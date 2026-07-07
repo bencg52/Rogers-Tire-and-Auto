@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rogers Tire & Auto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><div class="logo-mark">R</div><div><strong>ROGERS</strong><span>TIRE & AUTO</span></div></div>
+    <nav>
+      <a href="#home">Home</a><a href="#services">Services</a><a href="#about">About</a><a href="#contact">Contact</a><button id="adminOpen" class="nav-admin">Admin</button>
+    </nav>
+    <a class="call" href="tel:8645550198">(864) 555-0198</a>
+  </header>
+
+  <main id="publicSite">
+    <section class="hero" id="home">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">Rogers Tire & Auto</p>
+        <h1>Honest Repairs.<br>Quality Tires.<br><span>Driven by Trust.</span></h1>
+        <p>Dependable auto repair and tire services for everyday drivers, families, and work vehicles.</p>
+        <div class="hero-actions"><a href="#contact" class="btn primary">Request Appointment</a><a href="#services" class="btn ghost">View Services</a></div>
+      </div>
+    </section>
+
+    <section class="section" id="services">
+      <p class="eyebrow center">Our Services</p>
+      <h2>Complete Auto Repair</h2>
+      <div class="service-grid" id="publicServices"></div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="about-photo"></div>
+      <div class="about-copy">
+        <p class="eyebrow">About Us</p>
+        <h2>Your Neighborhood Auto Repair Shop</h2>
+        <p>At Rogers Tire & Auto, we treat every vehicle like it belongs to our own family. From tires and alignments to diagnostics and maintenance, our goal is fair pricing, reliable work, and fast turnaround.</p>
+        <div class="badges"><span>Experienced Technicians</span><span>Honest Pricing</span><span>Fast Turnaround</span></div>
+      </div>
+    </section>
+
+    <section class="reviews">
+      <h2>What Our Customers Say</h2>
+      <div class="review-grid"><article>★★★★★<p>Honest, reliable, and reasonably priced.</p><b>Jason T.</b></article><article>★★★★★<p>They explained everything and got me back on the road.</p><b>Sarah M.</b></article><article>★★★★★<p>Top notch service. Best team in town.</p><b>Mike R.</b></article></div>
+    </section>
+
+    <section class="contact" id="contact">
+      <div><p class="eyebrow">Special Offer</p><h2>10% Off</h2><p>Any service over $100</p><small>Not valid with other offers.</small></div>
+      <div><p class="eyebrow">Contact Us</p><p>📞 (864) 555-0198</p><p>📍 123 Main Street<br>Greenville, SC 29601</p><p>✉️ info@rogerstireandauto.com</p><p>Mon-Fri 7:30am - 5:30pm<br>Saturday 8:00am - 12:00pm</p></div>
+      <form class="card-form"><h3>Request an Appointment</h3><input placeholder="Full Name"><input placeholder="Phone Number"><input placeholder="Email"><input placeholder="Vehicle Information"><textarea placeholder="What seems to be the issue?"></textarea><button type="button" class="btn primary full">Submit Request</button></form>
+    </section>
+  </main>
+
+  <section id="adminApp" class="admin hidden">
+    <aside class="admin-side"><div class="brand admin-brand"><div class="logo-mark">R</div><div><strong>ROGERS</strong><span>TIRE & AUTO</span></div></div><button data-tab="dashboard" class="active">Dashboard</button><button data-tab="servicesAdmin">Services</button><button data-tab="poAdmin">Purchase Orders</button><button id="publicOpen">View Website</button></aside>
+    <div class="admin-main">
+      <div class="admin-top"><h1>Admin Dashboard</h1><button id="seedBtn" class="btn ghost dark">Reset Demo Data</button></div>
+
+      <div id="dashboard" class="admin-tab active">
+        <div class="stat-grid"><div class="stat"><span>Total Services</span><b id="serviceCount">0</b></div><div class="stat"><span>Purchase Orders</span><b id="poCount">0</b></div><div class="stat"><span>Estimated Revenue</span><b id="revenueCount">$0</b></div></div>
+        <div class="panel"><h2>Recent Purchase Orders</h2><div id="recentPOs"></div></div>
+      </div>
+
+      <div id="servicesAdmin" class="admin-tab">
+        <div class="panel-head"><h2>Services Management</h2><button id="addService" class="btn primary small">+ Add Service</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Service Name</th><th>Category</th><th>Description</th><th>Price</th><th>Actions</th></tr></thead><tbody id="servicesTable"></tbody></table></div>
+      </div>
+
+      <div id="poAdmin" class="admin-tab">
+        <div class="po-layout">
+          <div class="panel"><h2>Create Purchase Order</h2><label>Vendor<input id="poVendor" value="NAPA Auto Parts"></label><label>PO Number<input id="poNumber"></label><label>Date<input type="date" id="poDate"></label><label>Customer / Bill To<input id="poBillTo" value="Rogers Tire & Auto"></label><label>Tax Rate %<input id="taxRate" type="number" value="7"></label><h3>Add Services / Parts</h3><div class="add-line"><select id="lineService"></select><input id="lineQty" type="number" value="1" min="1"><button id="addLine" class="btn primary small">Add</button></div><div id="lineItems"></div><button id="savePO" class="btn ghost dark full">Save Draft</button><button id="generatePDF" class="btn primary full">Download PDF</button></div>
+          <div class="panel po-preview"><h2>Editable Purchase Order Preview</h2><div id="poPreview" contenteditable="true"></div></div>
+          <div class="panel"><h2>Purchase Order History</h2><div id="poHistory"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="serviceModal" class="modal hidden"><div class="modal-card"><h2 id="modalTitle">Add Service</h2><input id="svcName" placeholder="Service Name"><input id="svcCategory" placeholder="Category"><textarea id="svcDesc" placeholder="Description"></textarea><input id="svcPrice" type="number" step="0.01" placeholder="Price"><div class="modal-actions"><button id="cancelModal" class="btn ghost dark">Cancel</button><button id="saveService" class="btn primary">Save</button></div></div></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
