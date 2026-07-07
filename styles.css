@@ -1,93 +1,122 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { CalendarDays, Car, Gauge, LogOut, Menu, Phone, Plus, Save, ShieldCheck, Trash2, Wrench } from 'lucide-react'
-import { supabase } from './supabaseClient'
+import { Calendar, Car, Gauge, Phone, ShieldCheck, Wrench, MapPin, Mail, Clock, Lock } from 'lucide-react'
+import { supabase, supabaseConfigured } from './supabaseClient'
 import './styles.css'
 
-const DEFAULT_SERVICES = [
-  { service_name: 'Oil Change', category: 'Maintenance', description: 'Full-service oil change and inspection.', base_price: 49.99, active: true },
-  { service_name: 'Brake Inspection', category: 'Brakes', description: 'Brake system check, pads, rotors, and fluid inspection.', base_price: 0, active: true },
-  { service_name: 'Tire Rotation', category: 'Tires', description: 'Rotate tires and inspect tread wear.', base_price: 24.99, active: true },
-  { service_name: 'Wheel Alignment', category: 'Tires', description: 'Computerized alignment check and adjustment.', base_price: 99.99, active: true },
-  { service_name: 'Check Engine Diagnostic', category: 'Diagnostics', description: 'Scan codes and diagnose warning lights.', base_price: 89.99, active: true },
-  { service_name: 'A/C Service', category: 'A/C', description: 'A/C performance check and recharge estimate.', base_price: 129.99, active: true }
+const fallbackServices = [
+  { service_name: 'Brake Repair', category: 'Brakes', description: 'Brake inspections, pads, rotors, and complete brake repair.', base_price: 159.99 },
+  { service_name: 'Oil Change', category: 'Maintenance', description: 'Conventional, synthetic blend, and full synthetic oil changes.', base_price: 39.99 },
+  { service_name: 'Diagnostics', category: 'Diagnostics', description: 'Check engine light and electrical diagnostics.', base_price: 89.99 },
+  { service_name: 'Tires & Alignment', category: 'Tires', description: 'New tires, rotations, balancing, and wheel alignments.', base_price: 89.99 },
+  { service_name: 'A/C Service', category: 'A/C', description: 'A/C inspection, recharge, and cooling system service.', base_price: 99.99 },
+  { service_name: 'Engine Repair', category: 'Engine', description: 'Engine performance, leaks, belts, hoses, and repair work.', base_price: 149.99 }
 ]
 
 function App() {
-  const [view, setView] = useState('site')
-  const [session, setSession] = useState(null)
+  const [services, setServices] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ customer_name: '', phone: '', email: '', vehicle_info: '', requested_service: '', notes: '' })
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession))
-    return () => listener.subscription.unsubscribe()
+    async function loadServices() {
+      if (!supabaseConfigured) {
+        setServices(fallbackServices)
+        setLoading(false)
+        return
+      }
+      const { data, error } = await supabase
+        .from('services')
+        .select('service_name, category, description, base_price')
+        .eq('active', true)
+        .order('service_name')
+      setServices(error || !data?.length ? fallbackServices : data)
+      setLoading(false)
+    }
+    loadServices()
   }, [])
-
-  return view === 'admin' ? <Admin session={session} setView={setView} /> : <PublicSite setView={setView} />
-}
-
-function PublicSite({ setView }) {
-  const [services, setServices] = useState([])
-  const [form, setForm] = useState({ name: '', phone: '', email: '', vehicle: '', requested_service: '', message: '' })
-  const [sent, setSent] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  useEffect(() => { loadServices() }, [])
-
-  async function loadServices() {
-    const { data, error } = await supabase.from('services').select('*').eq('active', true).order('service_name')
-    if (!error && data?.length) setServices(data)
-    if (!error && !data?.length) setServices(DEFAULT_SERVICES)
-  }
 
   async function submitAppointment(e) {
     e.preventDefault()
-    const { error } = await supabase.from('appointment_requests').insert(form)
-    if (error) return alert('Appointment request failed. Make sure the Supabase schema was created.')
-    setSent(true)
-    setForm({ name: '', phone: '', email: '', vehicle: '', requested_service: '', message: '' })
+    setMessage('')
+    if (!form.customer_name || !form.phone) {
+      setMessage('Please enter your name and phone number.')
+      return
+    }
+    if (!supabaseConfigured) {
+      setMessage('Supabase is not connected yet. Check Netlify environment variables.')
+      return
+    }
+    const { error } = await supabase.from('appointment_requests').insert([form])
+    if (error) {
+      setMessage('Could not submit request. Check the appointment_requests table and RLS policy.')
+      return
+    }
+    setForm({ customer_name: '', phone: '', email: '', vehicle_info: '', requested_service: '', notes: '' })
+    setMessage('Appointment request sent. Rogers Tire & Auto will follow up with you.')
   }
 
-  return <>
-    <header className="topbar">
-      <div className="brand"><div className="logo">R</div><div><strong>ROGERS</strong><span>TIRE & AUTO</span></div></div>
-      <button className="menu" onClick={() => setMenuOpen(!menuOpen)}><Menu /></button>
-      <nav className={menuOpen ? 'open' : ''}>
-        <a href="#services">Services</a><a href="#tires">Tires</a><a href="#about">About</a><a href="#contact">Contact</a>
-        <button onClick={() => setView('admin')}>Employee Login</button>
-      </nav>
-    </header>
-    <section className="hero">
-      <div className="heroText"><p className="eyebrow">Greenville Area Auto Repair</p><h1>Honest repairs. Quality tires. Driven by trust.</h1><p>Dependable auto repair, tire service, diagnostics, brakes, alignments, and maintenance.</p><div><a className="primary" href="#contact">Request Appointment</a><a className="secondary" href="#services">View Services</a></div></div>
-    </section>
-    <section id="services" className="section"><p className="eyebrow center">Our Services</p><h2>Complete Auto Repair</h2><div className="cards">{services.map(s => <div className="card" key={s.id || s.service_name}><Wrench/><h3>{s.service_name}</h3><p>{s.description}</p><strong>{Number(s.base_price) > 0 ? `Starting at $${Number(s.base_price).toFixed(2)}` : 'Estimate required'}</strong></div>)}</div></section>
-    <section id="tires" className="split"><div><h2>Tires, rotations, balancing & alignments</h2><p>From tire replacement to routine rotations, Rogers Tire & Auto helps keep your vehicle safe and road-ready.</p><ul><li>New tire quotes</li><li>Mounting and balancing</li><li>Alignment checks</li><li>TPMS service</li></ul></div><div className="photoBlock"><Gauge size={90}/></div></section>
-    <section id="about" className="section dark"><p className="eyebrow center">Why Choose Us</p><h2>Your Neighborhood Auto Repair Shop</h2><div className="badges"><span><ShieldCheck/> Honest pricing</span><span><Car/> Experienced technicians</span><span><CalendarDays/> Fast turnaround</span></div></section>
-    <section id="contact" className="contact"><div><h2>Request an Appointment</h2><p><Phone/> (864) 555-0198</p><p>123 Main Street, Greenville, SC</p><p>Mon–Fri 7:30am–5:30pm · Saturday 8:00am–12:00pm</p></div><form onSubmit={submitAppointment}><input required placeholder="Full Name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/><input required placeholder="Phone Number" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/><input placeholder="Email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/><input placeholder="Vehicle Information" value={form.vehicle} onChange={e=>setForm({...form,vehicle:e.target.value})}/><select value={form.requested_service} onChange={e=>setForm({...form,requested_service:e.target.value})}><option value="">Select Service</option>{services.map(s=><option key={s.id || s.service_name}>{s.service_name}</option>)}</select><textarea placeholder="What seems to be the issue?" value={form.message} onChange={e=>setForm({...form,message:e.target.value})}/><button className="primary">Submit Request</button>{sent && <p className="success">Request saved to Supabase.</p>}</form></section>
-    <footer>© 2026 Rogers Tire & Auto · Built for Netlify + Supabase</footer>
-  </>
-}
+  return (
+    <div>
+      <header className="topbar">
+        <a className="brand" href="#home"><span className="logo">R</span><div><strong>ROGERS</strong><small>TIRE & AUTO</small></div></a>
+        <nav>
+          <a href="#services">Services</a><a href="#tires">Tires</a><a href="#about">About</a><a href="#contact">Contact</a><a href="#login">Employee Login</a>
+        </nav>
+        <a className="phone" href="tel:8645550198"><Phone size={16}/> (864) 555-0198</a>
+      </header>
 
-function Admin({ session, setView }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [services, setServices] = useState([])
-  const [appointments, setAppointments] = useState([])
-  const [saving, setSaving] = useState(false)
+      <section id="home" className="hero">
+        <div className="heroText">
+          <p className="eyebrow">Greenville, SC Auto Repair</p>
+          <h1>Honest Repairs. Quality Tires. Driven by Trust.</h1>
+          <p>Dependable tire, maintenance, diagnostic, and repair services for everyday drivers and local businesses.</p>
+          <div className="actions"><a className="btn primary" href="#appointment">Request Appointment</a><a className="btn ghost" href="#services">View Services</a></div>
+        </div>
+      </section>
 
-  useEffect(() => { if (session) { loadServices(); loadAppointments() } }, [session])
+      <section id="services" className="section light">
+        <p className="eyebrow red">Our Services</p><h2>Complete Auto Repair</h2>
+        <div className="cards">
+          {loading ? <p>Loading services...</p> : services.map((s) => <article className="card" key={s.service_name}><Wrench/><h3>{s.service_name}</h3><p>{s.description}</p><strong>Starting at ${Number(s.base_price || 0).toFixed(2)}</strong></article>)}
+        </div>
+      </section>
 
-  async function signIn(e) { e.preventDefault(); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) alert(error.message) }
-  async function signOut() { await supabase.auth.signOut(); setView('site') }
-  async function loadServices() { const { data } = await supabase.from('services').select('*').order('service_name'); setServices(data || []) }
-  async function loadAppointments() { const { data } = await supabase.from('appointment_requests').select('*').order('created_at', { ascending:false }); setAppointments(data || []) }
-  function addRow() { setServices([...services, { service_name:'', category:'', description:'', base_price:0, active:true }]) }
-  async function saveService(s) { setSaving(true); const payload = { service_name:s.service_name, category:s.category, description:s.description, base_price:Number(s.base_price||0), active:s.active !== false }; const { error } = s.id ? await supabase.from('services').update(payload).eq('id', s.id) : await supabase.from('services').insert(payload); setSaving(false); if (error) alert(error.message); else loadServices() }
-  async function deleteService(id) { if (!id) return setServices(services.filter(s=>s.id)); if (!confirm('Delete this service?')) return; await supabase.from('services').delete().eq('id', id); loadServices() }
+      <section id="tires" className="section dark split">
+        <div><p className="eyebrow red">Tires</p><h2>Tires, Rotations, Balancing & Alignments</h2><p>From daily-driver tires to alignment checks, Rogers Tire & Auto keeps your vehicle safe and road ready.</p></div>
+        <div className="featureGrid"><span><Car/> Tire Sales</span><span><Gauge/> Alignments</span><span><ShieldCheck/> Safety Checks</span></div>
+      </section>
 
-  if (!session) return <div className="login"><div className="loginCard"><h1>Rogers Tire & Auto</h1><h2>Employee Login</h2><form onSubmit={signIn}><input required placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)}/><input required type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)}/><button className="primary">Log In</button></form><button className="linkBtn" onClick={()=>setView('site')}>Back to website</button></div></div>
+      <section id="about" className="section light split">
+        <div><p className="eyebrow red">About Us</p><h2>Your Neighborhood Auto Repair Shop</h2><p>We treat every vehicle like it is our own, with clear communication, fair pricing, and quality repair work.</p></div>
+        <div className="trust"><span>Experienced Technicians</span><span>Honest Pricing</span><span>Fast Turnaround</span></div>
+      </section>
 
-  return <div className="admin"><aside><div className="brand"><div className="logo">R</div><div><strong>ROGERS</strong><span>TIRE & AUTO</span></div></div><button onClick={()=>setView('site')}>Public Site</button><button onClick={signOut}><LogOut/> Logout</button></aside><main><h1>Admin Dashboard</h1><div className="stats"><div><strong>{services.length}</strong><span>Services</span></div><div><strong>{appointments.length}</strong><span>Appointment Requests</span></div></div><section className="panel"><div className="panelHead"><h2>Services & Pricing</h2><button className="primary" onClick={addRow}><Plus/> Add Service</button></div><div className="table">{services.map((s,i)=><div className="row" key={s.id || i}><input placeholder="Service" value={s.service_name || ''} onChange={e=>{const a=[...services];a[i].service_name=e.target.value;setServices(a)}}/><input placeholder="Category" value={s.category || ''} onChange={e=>{const a=[...services];a[i].category=e.target.value;setServices(a)}}/><input placeholder="Description" value={s.description || ''} onChange={e=>{const a=[...services];a[i].description=e.target.value;setServices(a)}}/><input type="number" step="0.01" value={s.base_price || 0} onChange={e=>{const a=[...services];a[i].base_price=e.target.value;setServices(a)}}/><button onClick={()=>saveService(s)}><Save/></button><button onClick={()=>deleteService(s.id)}><Trash2/></button></div>)}</div>{saving && <p>Saving...</p>}</section><section className="panel"><h2>Appointment Requests</h2><div className="requestList">{appointments.map(a=><article key={a.id}><strong>{a.name}</strong><span>{a.phone} · {a.vehicle}</span><p>{a.requested_service}</p><p>{a.message}</p></article>)}</div></section></main></div>
+      <section id="appointment" className="section dark">
+        <p className="eyebrow red">Book Service</p><h2>Request an Appointment</h2>
+        <form className="form" onSubmit={submitAppointment}>
+          <input placeholder="Full Name *" value={form.customer_name} onChange={e => setForm({...form, customer_name: e.target.value})}/>
+          <input placeholder="Phone Number *" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}/>
+          <input placeholder="Email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}/>
+          <input placeholder="Vehicle Information" value={form.vehicle_info} onChange={e => setForm({...form, vehicle_info: e.target.value})}/>
+          <select value={form.requested_service} onChange={e => setForm({...form, requested_service: e.target.value})}><option value="">Requested Service</option>{services.map(s => <option key={s.service_name}>{s.service_name}</option>)}</select>
+          <textarea placeholder="What seems to be the issue?" value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}/>
+          <button className="btn primary" type="submit">Submit Request</button>
+          {message && <p className="message">{message}</p>}
+        </form>
+      </section>
+
+      <section id="contact" className="section light contactGrid">
+        <div><MapPin/> <strong>Address</strong><p>123 Main Street<br/>Greenville, SC 29601</p></div>
+        <div><Clock/> <strong>Hours</strong><p>Mon-Fri 7:30am - 5:30pm<br/>Sat 8:00am - 12:00pm</p></div>
+        <div><Mail/> <strong>Email</strong><p>info@rogerstireandauto.com</p></div>
+      </section>
+
+      <section id="login" className="section dark loginBox"><Lock/><h2>Employee Login</h2><p>Admin portal shell is ready. Supabase Authentication will be connected in Sprint 2.</p></section>
+      <footer>© 2026 Rogers Tire & Auto. Built for GitHub + Netlify + Supabase.</footer>
+    </div>
+  )
 }
 
 createRoot(document.getElementById('root')).render(<App />)
