@@ -23,7 +23,7 @@ export default function AdminLayout() {
       case 'settings':
         return <Settings />
       default:
-        return <Dashboard />
+        return <Dashboard onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
     }
   }
 

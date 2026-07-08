@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 
 const activeStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts']
 const finishedStatuses = ['Completed', 'Picked Up']
+const dashboardJobStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts', 'Completed', 'Picked Up', 'Cancelled']
 
 function money(value) {
   return Number(value || 0).toLocaleString(undefined, {
@@ -36,7 +37,7 @@ function DashboardGauge({ title, value, max, label, tone = 'red' }) {
   )
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onOpenJob }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
@@ -91,6 +92,22 @@ export default function Dashboard() {
     setJobs(jobData || [])
     setAppointments(appointmentData || [])
     setLoading(false)
+  }
+
+  async function updateDashboardJobStatus(jobId, status) {
+    setErrorMsg('')
+
+    const { error } = await supabase
+      .from('admin_repair_orders')
+      .update({ status })
+      .eq('id', jobId)
+
+    if (error) {
+      setErrorMsg(error.message)
+      return
+    }
+
+    setJobs(jobs.map((job) => job.id === jobId ? { ...job, status } : job))
   }
 
   const metrics = useMemo(() => {
@@ -265,12 +282,22 @@ export default function Dashboard() {
                       </tr>
                     ) : (
                       recentJobs.map((job) => (
-                        <tr key={job.id}>
+                        <tr
+                          key={job.id}
+                          className="clickableJobRow"
+                          onClick={() => onOpenJob?.(job.id)}
+                        >
                           <td><strong>{job.ro_number}</strong></td>
-                          <td>
-                            <span className={`inlineStatus ${String(job.status || 'Open').toLowerCase().replaceAll(' ', '-')}`}>
-                              {job.status || 'Open'}
-                            </span>
+                          <td onClick={(e) => e.stopPropagation()}>
+                            <select
+                              className={`inlineStatus ${String(job.status || 'Open').toLowerCase().replaceAll(' ', '-')}`}
+                              value={job.status || 'Open'}
+                              onChange={(e) => updateDashboardJobStatus(job.id, e.target.value)}
+                            >
+                              {dashboardJobStatuses.map((status) => (
+                                <option key={status} value={status}>{status}</option>
+                              ))}
+                            </select>
                           </td>
                           <td>{job.technician || '-'}</td>
                           <td>{money(job.total)}</td>

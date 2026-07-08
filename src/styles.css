@@ -1734,3 +1734,17 @@ background:#f8f8f8;
     grid-template-columns:1fr;
   }
 }
+
+
+/* --- Interactive dashboard recent jobs --- */
+.clickableJobRow{
+  cursor:pointer;
+}
+
+.clickableJobRow:hover{
+  background:#f8fafc;
+}
+
+.dashboardLowerGrid .inlineStatus{
+  min-width:120px;
+}
