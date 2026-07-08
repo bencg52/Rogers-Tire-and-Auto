@@ -1,0 +1,209 @@
+
+/* Customer Profile Update */
+.customerTopBar{
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+}
+
+.adminSearch{
+  flex:1;
+  max-width:520px;
+  padding:14px 16px;
+  border:1px solid #d7dce3;
+  border-radius:12px;
+  font-size:15px;
+  background:#fff;
+  color:#111;
+}
+
+.customerProfile{
+  margin-top:24px;
+}
+
+.profileHeader{
+  background:#111827;
+  color:#fff;
+  border-radius:18px;
+  padding:28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:24px;
+}
+
+.profileHeader h1{
+  color:#fff;
+  margin:0;
+  text-align:left;
+  font-size:34px;
+}
+
+.profileHeader p{
+  color:#d1d5db;
+  margin:8px 0 0;
+}
+
+.profileEyebrow{
+  color:#ef3b3b !important;
+  text-transform:uppercase;
+  font-weight:900;
+  letter-spacing:.12em;
+  font-size:12px;
+}
+
+.profileStats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  min-width:420px;
+}
+
+.profileStats div{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+}
+
+.profileStats strong{
+  display:block;
+  font-size:26px;
+  color:#fff;
+}
+
+.profileStats span{
+  color:#d1d5db;
+  font-size:12px;
+  text-transform:uppercase;
+  font-weight:800;
+}
+
+.profileGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+}
+
+.profilePanel{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.profilePanel h2{
+  text-align:left;
+  font-size:22px;
+  margin:0 0 20px;
+  color:#111;
+}
+
+.profilePanel label{
+  display:block;
+  margin:14px 0 7px;
+  font-weight:800;
+  color:#374151;
+}
+
+.profilePanel input,
+.profilePanel textarea{
+  width:100%;
+  padding:13px 15px;
+  border:1px solid #d7dce3;
+  border-radius:11px;
+  font:inherit;
+  color:#111;
+  background:#f9fafb;
+}
+
+.profilePanel textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.profileActions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:22px;
+  padding-top:20px;
+  border-top:1px solid #e5e7eb;
+}
+
+.panelHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.panelHeader h2{
+  margin:0;
+}
+
+.panelHeader span{
+  background:#ef3b3b;
+  color:#fff;
+  border-radius:999px;
+  padding:6px 12px;
+  font-weight:900;
+}
+
+.linkedList{
+  display:grid;
+  gap:12px;
+}
+
+.linkedItem{
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:16px;
+  background:#f9fafb;
+  display:grid;
+  gap:4px;
+}
+
+.linkedItem strong{
+  color:#111;
+  font-size:17px;
+}
+
+.linkedItem span{
+  color:#4b5563;
+  font-size:14px;
+}
+
+.fullWidth{
+  grid-column:1 / -1;
+}
+
+.emptyState{
+  color:#6b7280;
+  font-weight:700;
+}
+
+.compactTable{
+  box-shadow:none;
+}
+
+@media(max-width:1000px){
+  .profileHeader,
+  .customerTopBar{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .profileStats,
+  .profileGrid{
+    grid-template-columns:1fr;
+    min-width:0;
+  }
+
+  .fullWidth{
+    grid-column:auto;
+  }
+}
