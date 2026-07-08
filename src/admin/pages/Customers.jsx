@@ -10,6 +10,8 @@ export default function Customers() {
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [search, setSearch] = useState('')
+  const [vehicleSearch, setVehicleSearch] = useState('')
+  const [repairSearch, setRepairSearch] = useState('')
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -43,7 +45,7 @@ export default function Customers() {
 
     const { data: vehicleData, error: vehicleError } = await supabase
       .from('admin_vehicles')
-      .select('id, customer_id, year, make, model, vin, mileage, status, created_at')
+      .select('id, customer_id, year, make, model, vin, mileage, status, license_plate, color, engine, created_at')
       .order('created_at', { ascending: false })
 
     if (vehicleError) {
@@ -53,7 +55,7 @@ export default function Customers() {
 
     const { data: roData, error: roError } = await supabase
       .from('admin_repair_orders')
-      .select('id, ro_number, customer_id, vehicle_id, status, technician, opened_at')
+      .select('id, ro_number, customer_id, vehicle_id, status, technician, opened_at, total')
       .order('opened_at', { ascending: false })
 
     if (roError) {
@@ -79,6 +81,8 @@ export default function Customers() {
 
   function openCustomer(c) {
     setSelectedCustomer(c)
+    setVehicleSearch('')
+    setRepairSearch('')
     setForm({
       firstName: c.first_name || '',
       lastName: c.last_name || '',
@@ -103,6 +107,12 @@ export default function Customers() {
 
     const latest = ros[0]?.opened_at
     return latest ? new Date(latest).toLocaleDateString() : '-'
+  }
+
+  function customerInitials(c) {
+    const first = c?.first_name?.[0] || ''
+    const last = c?.last_name?.[0] || ''
+    return `${first}${last}`.toUpperCase() || 'C'
   }
 
   async function saveCustomer() {
@@ -160,7 +170,7 @@ export default function Customers() {
   }
 
   async function deleteCustomer() {
-    if (!confirm('Delete this customer? This will also remove linked vehicles because of the database relationship.')) return
+    if (!confirm('Delete this customer?')) return
 
     const { error } = await supabase
       .from('admin_customers')
@@ -189,127 +199,189 @@ export default function Customers() {
     const linkedVehicles = customerVehicles(selectedCustomer.id)
     const linkedRepairOrders = customerRepairOrders(selectedCustomer.id)
 
+    const filteredVehicles = linkedVehicles.filter((v) => {
+      const text = `${v.year || ''} ${v.make || ''} ${v.model || ''} ${v.vin || ''} ${v.mileage || ''} ${v.status || ''}`.toLowerCase()
+      return text.includes(vehicleSearch.toLowerCase())
+    })
+
+    const filteredRepairOrders = linkedRepairOrders.filter((ro) => {
+      const text = `${ro.ro_number || ''} ${ro.status || ''} ${ro.technician || ''}`.toLowerCase()
+      return text.includes(repairSearch.toLowerCase())
+    })
+
     return (
       <>
         {successMsg && <div className="saveToast">{successMsg}</div>}
 
-        <button className="btn secondary" onClick={() => setSelectedCustomer(null)}>
-          ← Back to Customers
-        </button>
+        <div className="profilePageTop">
+          <button className="btn secondary" onClick={() => setSelectedCustomer(null)}>
+            ← Back to Customers
+          </button>
+        </div>
 
-        <div className="customerProfile">
-          <div className="profileHeader">
-            <div>
-              <p className="profileEyebrow">Customer Profile</p>
-              <h1>{selectedCustomer.first_name} {selectedCustomer.last_name}</h1>
-              <p>{selectedCustomer.phone || 'No phone'} · {selectedCustomer.email || 'No email'}</p>
-            </div>
+        <div className="customerProfileHero">
+          <div className="customerAvatar">{customerInitials(selectedCustomer)}</div>
 
-            <div className="profileStats">
-              <div>
-                <strong>{linkedVehicles.length}</strong>
-                <span>Vehicles</span>
-              </div>
-              <div>
-                <strong>{linkedRepairOrders.length}</strong>
-                <span>Repair Orders</span>
-              </div>
-              <div>
-                <strong>{latestVisit(selectedCustomer.id)}</strong>
-                <span>Last Visit</span>
-              </div>
-            </div>
+          <div className="customerHeroInfo">
+            <p className="profileEyebrow">Customer Profile</p>
+            <h1>{selectedCustomer.first_name} {selectedCustomer.last_name}</h1>
+            <p>{selectedCustomer.phone || 'No phone'} <span>•</span> {selectedCustomer.email || 'No email'}</p>
           </div>
 
-          {errorMsg && <p style={{ color: 'red', fontWeight: 800 }}>{errorMsg}</p>}
+          <div className="customerStatCards">
+            <div className="customerStatCard">
+              <span>Vehicles</span>
+              <strong>{linkedVehicles.length}</strong>
+            </div>
 
-          <div className="profileGrid">
-            <section className="profilePanel">
+            <div className="customerStatCard">
+              <span>Repair Orders</span>
+              <strong>{linkedRepairOrders.length}</strong>
+            </div>
+
+            <div className="customerStatCard">
+              <span>Last Visit</span>
+              <strong>{latestVisit(selectedCustomer.id)}</strong>
+            </div>
+          </div>
+        </div>
+
+        {errorMsg && <p className="adminError">{errorMsg}</p>}
+
+        <div className="profileGrid">
+          <section className="profilePanel">
+            <div className="panelTitle">
+              <span>👤</span>
               <h2>Customer Information</h2>
+            </div>
 
-              <label>First Name</label>
-              <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-
-              <label>Last Name</label>
-              <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-
-              <label>Phone</label>
-              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-
-              <label>Email</label>
-              <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-
-              <label>Address</label>
-              <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-
-              <label>Notes</label>
-              <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-
-              <div className="profileActions">
-                <button className="btn secondary" onClick={deleteCustomer}>
-                  Delete Customer
-                </button>
-
-                <button className="btn primary" onClick={updateCustomer}>
-                  Save Changes
-                </button>
+            <div className="profileFormGrid">
+              <div>
+                <label>First Name</label>
+                <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
               </div>
-            </section>
 
-            <section className="profilePanel">
-              <div className="panelHeader">
+              <div>
+                <label>Last Name</label>
+                <input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
+              </div>
+
+              <div>
+                <label>Phone</label>
+                <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+
+              <div>
+                <label>Email</label>
+                <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+
+              <div className="wideField">
+                <label>Address</label>
+                <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              </div>
+
+              <div className="wideField">
+                <label>Notes</label>
+                <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="profileActions">
+              <button className="btn dangerBtn" onClick={deleteCustomer}>Delete Customer</button>
+              <button className="btn primary" onClick={updateCustomer}>Save Changes</button>
+            </div>
+          </section>
+
+          <section className="profilePanel">
+            <div className="panelHeader">
+              <div className="panelTitle">
+                <span>🚗</span>
                 <h2>Vehicles</h2>
-                <span>{linkedVehicles.length}</span>
               </div>
 
-              {linkedVehicles.length === 0 ? (
-                <p className="emptyState">No vehicles linked to this customer.</p>
-              ) : (
-                <div className="linkedList">
-                  {linkedVehicles.map((v) => (
-                    <div className="linkedItem" key={v.id}>
-                      <strong>{v.year} {v.make} {v.model}</strong>
-                      <span>VIN: {v.vin || '-'}</span>
-                      <span>Mileage: {v.mileage || '-'}</span>
-                      <span>Status: {v.status || 'Active'}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+              <input
+                className="miniSearch"
+                placeholder="Search vehicles..."
+                value={vehicleSearch}
+                onChange={(e) => setVehicleSearch(e.target.value)}
+              />
+            </div>
 
-            <section className="profilePanel fullWidth">
-              <div className="panelHeader">
+            {filteredVehicles.length === 0 ? (
+              <p className="emptyState">No vehicles found.</p>
+            ) : (
+              <div className="modernTableWrap">
+                <table className="modernTable">
+                  <thead>
+                    <tr>
+                      <th>Vehicle</th>
+                      <th>VIN</th>
+                      <th>Mileage</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredVehicles.map((v) => (
+                      <tr key={v.id}>
+                        <td><strong>{v.year} {v.make} {v.model}</strong></td>
+                        <td>{v.vin || '-'}</td>
+                        <td>{v.mileage || '-'}</td>
+                        <td><span className="statusPill">{v.status || 'Active'}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          <section className="profilePanel fullWidth">
+            <div className="panelHeader">
+              <div className="panelTitle">
+                <span>🔧</span>
                 <h2>Repair History</h2>
-                <span>{linkedRepairOrders.length}</span>
               </div>
 
-              {linkedRepairOrders.length === 0 ? (
-                <p className="emptyState">No repair orders found for this customer.</p>
-              ) : (
-                <table className="adminTable compactTable">
+              <input
+                className="miniSearch"
+                placeholder="Search repair orders..."
+                value={repairSearch}
+                onChange={(e) => setRepairSearch(e.target.value)}
+              />
+            </div>
+
+            {filteredRepairOrders.length === 0 ? (
+              <p className="emptyState">No repair orders found.</p>
+            ) : (
+              <div className="modernTableWrap">
+                <table className="modernTable">
                   <thead>
                     <tr>
                       <th>RO #</th>
                       <th>Status</th>
                       <th>Technician</th>
                       <th>Opened</th>
+                      <th>Total</th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {linkedRepairOrders.map((ro) => (
+                    {filteredRepairOrders.map((ro) => (
                       <tr key={ro.id}>
-                        <td>{ro.ro_number}</td>
-                        <td>{ro.status}</td>
+                        <td><strong>{ro.ro_number}</strong></td>
+                        <td><span className="statusPill">{ro.status || 'Open'}</span></td>
                         <td>{ro.technician || '-'}</td>
                         <td>{ro.opened_at ? new Date(ro.opened_at).toLocaleDateString() : '-'}</td>
+                        <td>${Number(ro.total || 0).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              )}
-            </section>
-          </div>
+              </div>
+            )}
+          </section>
         </div>
       </>
     )
@@ -334,7 +406,7 @@ export default function Customers() {
         </button>
       </div>
 
-      {errorMsg && <p style={{ color: 'red', fontWeight: 800 }}>{errorMsg}</p>}
+      {errorMsg && <p className="adminError">{errorMsg}</p>}
 
       <table className="adminTable">
         <thead>

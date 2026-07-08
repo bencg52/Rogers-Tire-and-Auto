@@ -8,6 +8,7 @@ export default function Vehicles() {
   const [selectedVehicle, setSelectedVehicle] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [search, setSearch] = useState('')
 
   const [form, setForm] = useState({
     customerId: '',
@@ -156,6 +157,12 @@ export default function Vehicles() {
     showSuccess('Vehicle deleted')
   }
 
+  const filteredVehicles = vehicles.filter((v) => {
+    const customerName = v.admin_customers ? `${v.admin_customers.first_name} ${v.admin_customers.last_name}` : ''
+    const text = `${customerName} ${v.year || ''} ${v.make || ''} ${v.model || ''} ${v.vin || ''} ${v.mileage || ''} ${v.status || ''}`.toLowerCase()
+    return text.includes(search.toLowerCase())
+  })
+
   if (selectedVehicle) {
     return (
       <>
@@ -216,7 +223,14 @@ export default function Vehicles() {
 
       <h1>Vehicles</h1>
 
-      <div className="pageHeader">
+      <div className="pageHeader customerTopBar">
+        <input
+          className="adminSearch"
+          placeholder="Search vehicles by customer, VIN, make, model, or status..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
         <button className="btn primary" onClick={() => setShowForm(true)}>
           + Add Vehicle
         </button>
@@ -238,14 +252,14 @@ export default function Vehicles() {
         </thead>
 
         <tbody>
-          {vehicles.length === 0 ? (
+          {filteredVehicles.length === 0 ? (
             <tr>
               <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
                 No vehicles found.
               </td>
             </tr>
           ) : (
-            vehicles.map((v) => (
+            filteredVehicles.map((v) => (
               <tr key={v.id} onClick={() => openVehicle(v)} style={{ cursor: 'pointer' }}>
                 <td>
                   {v.admin_customers
