@@ -1748,3 +1748,22 @@ background:#f8f8f8;
 .dashboardLowerGrid .inlineStatus{
   min-width:120px;
 }
+
+
+/* --- Admin branding update --- */
+.adminBrandTitle{
+  line-height:1.1;
+}
+
+.adminBrandTitle span{
+  display:block;
+}
+
+.adminBrandTitle small{
+  display:block;
+  margin-top:6px;
+  color:#ef3b3b;
+  font-size:15px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}

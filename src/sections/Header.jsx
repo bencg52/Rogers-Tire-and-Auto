@@ -8,7 +8,7 @@ export default function Header() {
         <img
           className="brandSign"
           src="/images/rogers-logo-sign.jpg"
-          alt="Rogers Tire N Auto"
+          alt="Roger's Tire -N- Auto"
         />
 
         <div>

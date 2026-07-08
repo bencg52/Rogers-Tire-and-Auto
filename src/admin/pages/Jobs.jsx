@@ -380,7 +380,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
         <body>
           <div class="header">
             <div>
-              <h1>ROGER'S TIRE N AUTO</h1>
+              <h1>ROGER'S TIRE -N- AUTO</h1>
               <p>Repair Order / Invoice</p>
               <p>${new Date().toLocaleDateString()}</p>
             </div>

@@ -106,7 +106,7 @@ function PublicSite() {
     if (error) {
       setMessage('Could not submit appointment request: ' + error.message)
     } else {
-      setMessage('Appointment request submitted. Rogers Tire N Auto will follow up.')
+      setMessage('Appointment request submitted. Roger's Tire -N- Auto will follow up.')
       setForm({
         full_name: '',
         phone: '',
@@ -216,7 +216,7 @@ function PublicSite() {
       <section id="contact" className="contact contactUpgrade">
         <div className="contactMain">
           <p className="eyebrow">Need Your Car Fixed?</p>
-          <h2>Call Roger's Tire N Auto Today</h2>
+          <h2>Call Roger's Tire -N- Auto Today</h2>
           <p className="contactText">
             Questions, repairs, tires, inspections, or appointments — give us a call and we’ll help you get pointed in the right direction.
           </p>
@@ -240,7 +240,7 @@ function PublicSite() {
         </div>
 
         {phoneNumber && (
-          <a className="floatingCall" href={callLink} aria-label="Call Roger's Tire N Auto">
+          <a className="floatingCall" href={callLink} aria-label="Call Roger's Tire -N- Auto">
             <Phone />
           </a>
         )}

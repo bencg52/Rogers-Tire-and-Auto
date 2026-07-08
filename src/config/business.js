@@ -1,5 +1,5 @@
 export const BUSINESS = {
-  name: "Rogers Tire N Auto",
+  name: "Roger's Tire -N- Auto",
 
   phone: "(864) 277-7800",
   phoneLink: "18642777800",

@@ -18,7 +18,7 @@ export default function Reviews() {
         <div className="review">
           <div className="stars">★★★★★</div>
           <p>
-            “Rogers Tire N Auto is the only place I truly trust to bring my
+            “Roger's Tire -N- Auto is the only place I truly trust to bring my
             vehicles. They don’t sell you more than you need and truly do right
             by the customer.”
           </p>

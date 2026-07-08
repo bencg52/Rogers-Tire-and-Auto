@@ -11,7 +11,7 @@ export default function Hero() {
             FAMILY OWNED • TRUSTED LOCAL SERVICE
           </p>
 
-          <h1 className="heroTitleOneLine">Rogers Tire N Auto</h1>
+          <h1 className="heroTitleOneLine">Roger's Tire -N- Auto</h1>
 
           <h2 className="heroSubTitle">
             Honest Auto Repair & Tire Service Since Day One

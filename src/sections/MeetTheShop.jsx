@@ -4,7 +4,7 @@ export default function MeetTheShop() {
   return (
     <section id="about" className="meetShop">
       <div className="meetImage">
-        <img src="/images/shop-front-angle.jpg.png" alt="Rogers Tire N Auto storefront" />
+        <img src="/images/shop-front-angle.jpg.png" alt="Roger's Tire -N- Auto storefront" />
       </div>
 
       <div className="meetText">

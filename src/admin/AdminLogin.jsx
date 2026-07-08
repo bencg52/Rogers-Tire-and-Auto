@@ -11,8 +11,8 @@ export default function AdminLogin() {
   return (
     <div className="adminLogin">
       <div className="loginCard">
-        <h1>Roger's Tire N Auto</h1>
-        <p className="adminSubtitle">Secure Administration Portal</p>
+        <h1>Roger's Tire -N- Auto</h1>
+        <p className="adminSubtitle">Admin Portal</p>
 
         <input type="text" placeholder="Username" />
         <input type="password" placeholder="Password" />
