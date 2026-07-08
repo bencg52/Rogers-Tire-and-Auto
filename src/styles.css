@@ -1128,3 +1128,110 @@ background:#f8f8f8;
     font-size:34px;
   }
 }
+
+
+/* --- Customers / Jobs workspace update --- */
+.topButtonGroup{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.workspaceGrid{
+  display:grid;
+  grid-template-columns:minmax(420px,.9fr) minmax(520px,1.1fr);
+  gap:24px;
+}
+
+.workspaceTable{
+  margin-top:20px;
+}
+
+.actionCell{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.smallBtn{
+  border:1px solid #d8dee8;
+  border-radius:10px;
+  background:#fff;
+  color:#111827;
+  padding:8px 10px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.smallBtn:hover{
+  border-color:#ef3b3b;
+  color:#ef3b3b;
+}
+
+.dangerSmall{
+  color:#dc2626;
+  border-color:#fecaca;
+}
+
+.panelTools{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.panelTools .miniSearch{
+  min-width:250px;
+}
+
+.profilePageTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  margin-bottom:18px;
+}
+
+.modalGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.wideModal{
+  max-width:760px;
+}
+
+.wideModal select,
+.wideModal input,
+.wideModal textarea{
+  width:100%;
+  margin-bottom:12px;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #d8dee8;
+  font:inherit;
+}
+
+.wideModal textarea{
+  min-height:92px;
+  resize:vertical;
+}
+
+@media(max-width:1150px){
+  .workspaceGrid{
+    grid-template-columns:1fr;
+  }
+
+  .profilePageTop{
+    flex-direction:column;
+    align-items:stretch;
+  }
+}
+
+@media(max-width:720px){
+  .modalGrid{
+    grid-template-columns:1fr;
+  }
+}
