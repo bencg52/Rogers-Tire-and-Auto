@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import AdminLogin from './admin/AdminLogin'
 import MeetTheShop from './sections/MeetTheShop'
 import Gallery from './sections/Gallery'
@@ -106,7 +106,7 @@ function PublicSite() {
     if (error) {
       setMessage('Could not submit appointment request: ' + error.message)
     } else {
-      setMessage('Appointment request submitted. Roger's Tire -N- Auto will follow up.')
+      setMessage("Appointment request submitted. Roger's Tire -N- Auto will follow up.")
       setForm({
         full_name: '',
         phone: '',
@@ -238,21 +238,7 @@ function PublicSite() {
           <div><MapPin /> {BUSINESS.fullAddress}</div>
           <div><Clock /> {BUSINESS.hoursSummary}</div>
         </div>
-
-        {phoneNumber && (
-          <a className="floatingCall" href={callLink} aria-label="Call Roger's Tire -N- Auto">
-            <Phone />
-          </a>
-        )}
       </section>
-
-      <section id="login" className="section login">
-        <h2>Admin Login</h2>
-        <p>Authorized shop administration only.</p>
-        <Link className="btn secondary" to="/admin">Open Admin Portal</Link>
-      </section>
-
-      <footer>© 2026 {BUSINESS.name}. Built on GitHub, Netlify, and Supabase.</footer>
     </>
   )
 }
