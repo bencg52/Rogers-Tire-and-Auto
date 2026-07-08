@@ -9,3 +9,7 @@ Business data is stored in Supabase. No localStorage/sessionStorage is used for 
 
 ## Repair order invoice PDF update
 Completed and Picked Up repair orders now show a Print PDF button. Settings includes a button back to the customer website.
+
+
+## Sequential RO numbers
+New repair orders now use sequential RO numbers starting at RO-100001, then RO-100002, etc. Existing higher RO numbers are respected.

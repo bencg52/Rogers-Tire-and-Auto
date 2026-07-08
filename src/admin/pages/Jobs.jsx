@@ -232,6 +232,28 @@ export default function Jobs({ openJobId, onJobOpened }) {
     setShowJobForm(true)
   }
 
+  async function generateNextRoNumber() {
+    const { data, error } = await supabase
+      .from('admin_repair_orders')
+      .select('ro_number')
+      .like('ro_number', 'RO-%')
+      .limit(5000)
+
+    if (error) {
+      throw error
+    }
+
+    const highest = (data || []).reduce((max, row) => {
+      const match = String(row.ro_number || '').match(/^RO-(\d+)$/)
+      if (!match) return max
+
+      const number = Number(match[1])
+      return Number.isFinite(number) && number > max ? number : max
+    }, 100000)
+
+    return `RO-${highest + 1}`
+  }
+
   async function saveJob() {
     setErrorMsg('')
 
@@ -263,7 +285,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
 
       showSuccess('Job updated')
     } else {
-      const roNumber = 'RO-' + Date.now().toString().slice(-6)
+      const roNumber = await generateNextRoNumber()
       const { error } = await supabase
         .from('admin_repair_orders')
         .insert({ ...payload, ro_number: roNumber })
