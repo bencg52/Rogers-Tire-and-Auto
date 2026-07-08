@@ -34,7 +34,7 @@ const emptyJob = {
   status: 'Open'
 }
 
-export default function Jobs() {
+export default function Jobs({ openJobId, onJobOpened }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
@@ -51,6 +51,17 @@ export default function Jobs() {
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    if (!openJobId || !jobs.length) return
+
+    const job = jobs.find((j) => j.id === openJobId)
+
+    if (job) {
+      openJobForm(job)
+      onJobOpened?.()
+    }
+  }, [openJobId, jobs])
 
   function showSuccess(message) {
     setSuccessMsg(message)

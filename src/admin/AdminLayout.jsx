@@ -8,13 +8,14 @@ import Settings from './pages/Settings'
 
 export default function AdminLayout() {
   const [page, setPage] = useState('dashboard')
+  const [jobToOpen, setJobToOpen] = useState(null)
 
   const renderPage = () => {
     switch (page) {
       case 'customers':
-        return <Customers />
+        return <Customers onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
       case 'jobs':
-        return <Jobs />
+        return <Jobs openJobId={jobToOpen} onJobOpened={() => setJobToOpen(null)} />
       case 'appointments':
         return <Appointments />
       case 'reports':
@@ -35,7 +36,7 @@ export default function AdminLayout() {
 
         <button onClick={() => setPage('dashboard')}>🏠 Dashboard</button>
         <button onClick={() => setPage('customers')}>👥 Customers</button>
-        <button onClick={() => setPage('jobs')}>🔧 Jobs / Invoices</button>
+        <button onClick={() => { setJobToOpen(null); setPage('jobs') }}>🔧 Jobs / Invoices</button>
         <button onClick={() => setPage('appointments')}>📅 Appointments</button>
         <button onClick={() => setPage('reports')}>📊 Reports</button>
         <button onClick={() => setPage('settings')}>⚙️ Settings</button>

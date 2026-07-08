@@ -12,8 +12,23 @@ const emptyCustomer = {
   notes: ''
 }
 
-export default function Customers() {
+const emptyVehicle = {
+  customerId: '',
+  year: '',
+  make: '',
+  model: '',
+  vin: '',
+  mileage: '',
+  licensePlate: '',
+  color: '',
+  engine: '',
+  notes: '',
+  status: 'Active'
+}
+
+export default function Customers({ onOpenJob }) {
   const [showCustomerForm, setShowCustomerForm] = useState(false)
+  const [showVehicleForm, setShowVehicleForm] = useState(false)
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [repairOrders, setRepairOrders] = useState([])
@@ -23,6 +38,7 @@ export default function Customers() {
   const [search, setSearch] = useState('')
   const [repairSearch, setRepairSearch] = useState('')
   const [customerForm, setCustomerForm] = useState(emptyCustomer)
+  const [vehicleForm, setVehicleForm] = useState(emptyVehicle)
 
   useEffect(() => {
     loadData()
@@ -75,6 +91,40 @@ export default function Customers() {
     setCustomerForm(emptyCustomer)
   }
 
+  function resetVehicleForm() {
+    setVehicleForm({ ...emptyVehicle, customerId: selectedCustomer?.id || '' })
+  }
+
+  async function saveVehicle() {
+    setErrorMsg('')
+
+    const { error } = await supabase
+      .from('admin_vehicles')
+      .insert({
+        customer_id: selectedCustomer?.id || vehicleForm.customerId || null,
+        year: vehicleForm.year,
+        make: vehicleForm.make,
+        model: vehicleForm.model,
+        vin: vehicleForm.vin,
+        mileage: vehicleForm.mileage,
+        license_plate: vehicleForm.licensePlate,
+        color: vehicleForm.color,
+        engine: vehicleForm.engine,
+        notes: vehicleForm.notes,
+        status: vehicleForm.status
+      })
+
+    if (error) {
+      setErrorMsg(error.message)
+      return
+    }
+
+    setShowVehicleForm(false)
+    resetVehicleForm()
+    await loadData()
+    showSuccess('Vehicle added')
+  }
+
   function customerName(c) {
     if (!c) return 'Walk-In / No Customer'
     return `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Unnamed Customer'
@@ -94,6 +144,7 @@ export default function Customers() {
   function openCustomer(c) {
     setSelectedCustomer(c)
     setRepairSearch('')
+    setVehicleForm({ ...emptyVehicle, customerId: c.id })
     setCustomerForm({
       firstName: c.first_name || '',
       lastName: c.last_name || '',
@@ -313,9 +364,15 @@ export default function Customers() {
           </section>
 
           <section className="profilePanel">
-            <div className="panelTitle">
-              <span>🚗</span>
-              <h2>Vehicles</h2>
+            <div className="panelHeader">
+              <div className="panelTitle">
+                <span>🚗</span>
+                <h2>Vehicles</h2>
+              </div>
+
+              <button className="btn primary" onClick={() => { resetVehicleForm(); setShowVehicleForm(true) }}>
+                + Add Vehicle
+              </button>
             </div>
 
             {linkedVehicles.length === 0 ? (
@@ -382,13 +439,14 @@ export default function Customers() {
                     {linkedRepairOrders.map((ro) => {
                       const vehicle = vehicles.find((v) => v.id === ro.vehicle_id)
                       return (
-                        <tr key={ro.id}>
+                        <tr key={ro.id} onClick={() => onOpenJob?.(ro.id)} style={{ cursor: 'pointer' }}>
                           <td><strong>{ro.ro_number}</strong></td>
                           <td>{vehicleName(vehicle)}</td>
                           <td>
                             <select
                               className={`inlineStatus ${String(ro.status || 'Open').toLowerCase().replaceAll(' ', '-')}`}
                               value={ro.status || 'Open'}
+                              onClick={(e) => e.stopPropagation()}
                               onChange={(e) => updateCustomerJobStatus(ro.id, e.target.value)}
                             >
                               {customerJobStatuses.map((status) => (
@@ -408,6 +466,42 @@ export default function Customers() {
             )}
           </section>
         </div>
+
+        {showVehicleForm && (
+          <div className="modalOverlay">
+            <div className="modalCard wideModal">
+              <button className="modalClose" onClick={() => setShowVehicleForm(false)}>×</button>
+
+              <h2>Add Vehicle for {customerName(selectedCustomer)}</h2>
+
+              <div className="modalGrid">
+                <input placeholder="Year" value={vehicleForm.year} onChange={(e) => setVehicleForm({ ...vehicleForm, year: e.target.value })} />
+                <input placeholder="Make" value={vehicleForm.make} onChange={(e) => setVehicleForm({ ...vehicleForm, make: e.target.value })} />
+                <input placeholder="Model" value={vehicleForm.model} onChange={(e) => setVehicleForm({ ...vehicleForm, model: e.target.value })} />
+                <input placeholder="VIN" value={vehicleForm.vin} onChange={(e) => setVehicleForm({ ...vehicleForm, vin: e.target.value })} />
+                <input placeholder="Mileage" value={vehicleForm.mileage} onChange={(e) => setVehicleForm({ ...vehicleForm, mileage: e.target.value })} />
+                <input placeholder="License Plate" value={vehicleForm.licensePlate} onChange={(e) => setVehicleForm({ ...vehicleForm, licensePlate: e.target.value })} />
+                <input placeholder="Color" value={vehicleForm.color} onChange={(e) => setVehicleForm({ ...vehicleForm, color: e.target.value })} />
+                <input placeholder="Engine" value={vehicleForm.engine} onChange={(e) => setVehicleForm({ ...vehicleForm, engine: e.target.value })} />
+              </div>
+
+              <select value={vehicleForm.status} onChange={(e) => setVehicleForm({ ...vehicleForm, status: e.target.value })}>
+                <option>Active</option>
+                <option>In Shop</option>
+                <option>Completed</option>
+                <option>Inactive</option>
+              </select>
+
+              <textarea placeholder="Notes" value={vehicleForm.notes} onChange={(e) => setVehicleForm({ ...vehicleForm, notes: e.target.value })} />
+
+              <div className="modalActions">
+                <button className="btn secondary" onClick={() => setShowVehicleForm(false)}>Cancel</button>
+                <button className="btn primary" onClick={saveVehicle}>Add Vehicle</button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </>
     )
   }

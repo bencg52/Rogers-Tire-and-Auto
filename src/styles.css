@@ -1513,3 +1513,45 @@ background:#f8f8f8;
   color:#166534;
   background:#dcfce7;
 }
+
+
+/* --- Customer add vehicle and job deep link update --- */
+.panelHeader .btn{
+  white-space:nowrap;
+}
+
+.modernTable tbody tr:hover{
+  background:#f8fafc;
+}
+
+.wideModal{
+  max-width:760px;
+}
+
+.modalGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.wideModal select,
+.wideModal input,
+.wideModal textarea{
+  width:100%;
+  margin-bottom:12px;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid #d8dee8;
+  font:inherit;
+}
+
+.wideModal textarea{
+  min-height:92px;
+  resize:vertical;
+}
+
+@media(max-width:720px){
+  .modalGrid{
+    grid-template-columns:1fr;
+  }
+}
