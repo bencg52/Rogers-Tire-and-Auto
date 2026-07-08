@@ -16,6 +16,8 @@ const emptyVehicle = {
   status: 'Active'
 }
 
+const jobStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts', 'Completed', 'Picked Up', 'Cancelled']
+
 const emptyJob = {
   id: null,
   customerId: '',
@@ -269,6 +271,23 @@ export default function Jobs() {
     await loadData()
   }
 
+  async function updateJobStatus(jobId, status) {
+    setErrorMsg('')
+
+    const { error } = await supabase
+      .from('admin_repair_orders')
+      .update({ status })
+      .eq('id', jobId)
+
+    if (error) {
+      setErrorMsg(error.message)
+      return
+    }
+
+    setJobs(jobs.map((job) => job.id === jobId ? { ...job, status } : job))
+    showSuccess('Status updated')
+  }
+
   async function deleteJob(jobId) {
     if (!confirm('Delete this job?')) return
 
@@ -476,20 +495,28 @@ export default function Jobs() {
                 filteredJobs.map((job) => {
                   const customer = customers.find((c) => c.id === job.customer_id)
                   const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
-                  const canPrint = job.status === 'Completed' || job.status === 'Picked Up'
-
                   return (
                     <tr key={job.id}>
                       <td><strong>{job.ro_number}</strong></td>
                       <td>{customerName(customer)}</td>
                       <td>{vehicleName(vehicle)}</td>
-                      <td><span className="statusPill">{job.status || 'Open'}</span></td>
+                      <td>
+                        <select
+                          className={`inlineStatus ${String(job.status || 'Open').toLowerCase().replaceAll(' ', '-')}`}
+                          value={job.status || 'Open'}
+                          onChange={(e) => updateJobStatus(job.id, e.target.value)}
+                        >
+                          {jobStatuses.map((status) => (
+                            <option key={status} value={status}>{status}</option>
+                          ))}
+                        </select>
+                      </td>
                       <td>{job.technician || '-'}</td>
                       <td>${money(job.total)}</td>
                       <td>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</td>
                       <td className="actionCell">
                         <button className="smallBtn" onClick={() => openJobForm(job)}>Edit</button>
-                        {canPrint && <button className="smallBtn printSmall" onClick={() => printJob(job)}>Print PDF</button>}
+                        <button className="smallBtn printSmall" onClick={() => printJob(job)}>Print PDF</button>
                         <button className="smallBtn dangerSmall" onClick={() => deleteJob(job.id)}>Delete</button>
                       </td>
                     </tr>
@@ -565,14 +592,9 @@ export default function Jobs() {
             </select>
 
             <select value={jobForm.status} onChange={(e) => setJobForm({ ...jobForm, status: e.target.value })}>
-              <option>Open</option>
-              <option>Estimate</option>
-              <option>Approved</option>
-              <option>In Progress</option>
-              <option>Waiting on Parts</option>
-              <option>Completed</option>
-              <option>Picked Up</option>
-              <option>Cancelled</option>
+              {jobStatuses.map((status) => (
+                <option key={status} value={status}>{status}</option>
+              ))}
             </select>
 
             <div className="modalGrid">

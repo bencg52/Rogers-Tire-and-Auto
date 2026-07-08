@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
+const customerJobStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts', 'Completed', 'Picked Up', 'Cancelled']
+
 const emptyCustomer = {
   firstName: '',
   lastName: '',
@@ -176,6 +178,23 @@ export default function Customers() {
     setCustomers(customers.map((c) => c.id === data.id ? data : c))
     setSelectedCustomer(data)
     showSuccess('Customer updated')
+  }
+
+  async function updateCustomerJobStatus(jobId, status) {
+    setErrorMsg('')
+
+    const { error } = await supabase
+      .from('admin_repair_orders')
+      .update({ status })
+      .eq('id', jobId)
+
+    if (error) {
+      setErrorMsg(error.message)
+      return
+    }
+
+    setRepairOrders(repairOrders.map((ro) => ro.id === jobId ? { ...ro, status } : ro))
+    showSuccess('Status updated')
   }
 
   async function deleteCustomer() {
@@ -366,7 +385,17 @@ export default function Customers() {
                         <tr key={ro.id}>
                           <td><strong>{ro.ro_number}</strong></td>
                           <td>{vehicleName(vehicle)}</td>
-                          <td><span className="statusPill">{ro.status || 'Open'}</span></td>
+                          <td>
+                            <select
+                              className={`inlineStatus ${String(ro.status || 'Open').toLowerCase().replaceAll(' ', '-')}`}
+                              value={ro.status || 'Open'}
+                              onChange={(e) => updateCustomerJobStatus(ro.id, e.target.value)}
+                            >
+                              {customerJobStatuses.map((status) => (
+                                <option key={status} value={status}>{status}</option>
+                              ))}
+                            </select>
+                          </td>
                           <td>{ro.technician || '-'}</td>
                           <td>{ro.opened_at ? new Date(ro.opened_at).toLocaleDateString() : '-'}</td>
                           <td>${Number(ro.total || 0).toFixed(2)}</td>
