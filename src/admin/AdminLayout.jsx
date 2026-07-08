@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
-import Vehicles from './pages/Vehicles'
-import RepairOrders from './pages/RepairOrders'
+import Jobs from './pages/Jobs'
 import Appointments from './pages/Appointments'
 import Reports from './pages/Reports'
 import Settings from './pages/Settings'
@@ -14,10 +13,8 @@ export default function AdminLayout() {
     switch (page) {
       case 'customers':
         return <Customers />
-      case 'vehicles':
-        return <Vehicles />
-      case 'repairorders':
-        return <RepairOrders />
+      case 'jobs':
+        return <Jobs />
       case 'appointments':
         return <Appointments />
       case 'reports':
@@ -37,10 +34,13 @@ export default function AdminLayout() {
         <h2>Roger's Admin</h2>
 
         <button onClick={() => setPage('dashboard')}>🏠 Dashboard</button>
-        <button onClick={() => setPage('customers')}>👥 Customers / Jobs</button>
+        <button onClick={() => setPage('customers')}>👥 Customers</button>
+        <button onClick={() => setPage('jobs')}>🔧 Jobs / Invoices</button>
         <button onClick={() => setPage('appointments')}>📅 Appointments</button>
         <button onClick={() => setPage('reports')}>📊 Reports</button>
         <button onClick={() => setPage('settings')}>⚙️ Settings</button>
+
+        <a className="adminSiteLink" href="/">🌐 Customer Website</a>
 
       </aside>
 

@@ -1400,3 +1400,57 @@ background:#f8f8f8;
     font-size:42px;
   }
 }
+
+
+/* --- Split Customers and Jobs update --- */
+.adminSiteLink{
+  display:block;
+  margin:28px 20px 0;
+  padding:14px 16px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  font-weight:900;
+  text-decoration:none;
+}
+
+.adminSiteLink:hover{
+  background:#ef3b3b;
+  border-color:#ef3b3b;
+}
+
+.customerOnlyGrid{
+  grid-template-columns:minmax(360px,.9fr) minmax(460px,1.1fr);
+}
+
+.jobsPanel{
+  margin-top:0;
+}
+
+.printSmall{
+  border-color:#bbf7d0;
+  background:#f0fdf4;
+  color:#166534;
+}
+
+.chargeHeading{
+  color:#111827;
+  font-size:18px;
+  margin:10px 0 8px;
+}
+
+.printNotice{
+  background:#f0fdf4;
+  border:1px solid #bbf7d0;
+  color:#166534;
+  border-radius:12px;
+  padding:12px 14px;
+  font-weight:900;
+}
+
+@media(max-width:1100px){
+  .customerOnlyGrid{
+    grid-template-columns:1fr;
+  }
+}
