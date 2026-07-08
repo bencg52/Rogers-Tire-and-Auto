@@ -236,19 +236,28 @@ export default function Jobs({ openJobId, onJobOpened }) {
     const { data, error } = await supabase
       .from('admin_repair_orders')
       .select('ro_number')
-      .like('ro_number', 'RO-%')
+      .like('ro_number', 'RO-1%')
       .limit(5000)
 
     if (error) {
       throw error
     }
 
+    /*
+      Start the clean shop sequence at RO-100001.
+      Older random RO numbers like RO-775731 are ignored so they do not
+      force the new sequence to continue from the old random format.
+    */
     const highest = (data || []).reduce((max, row) => {
       const match = String(row.ro_number || '').match(/^RO-(\d+)$/)
       if (!match) return max
 
       const number = Number(match[1])
-      return Number.isFinite(number) && number > max ? number : max
+
+      if (!Number.isFinite(number)) return max
+      if (number < 100001 || number > 199999) return max
+
+      return number > max ? number : max
     }, 100000)
 
     return `RO-${highest + 1}`

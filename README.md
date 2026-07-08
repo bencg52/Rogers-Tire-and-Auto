@@ -13,3 +13,7 @@ Completed and Picked Up repair orders now show a Print PDF button. Settings incl
 
 ## Sequential RO numbers
 New repair orders now use sequential RO numbers starting at RO-100001, then RO-100002, etc. Existing higher RO numbers are respected.
+
+
+## RO 100-series fix
+New repair orders now start at RO-100001 and ignore older random RO numbers such as RO-775731.
