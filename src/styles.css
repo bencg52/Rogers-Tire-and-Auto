@@ -1235,3 +1235,168 @@ background:#f8f8f8;
     grid-template-columns:1fr;
   }
 }
+
+/* --- Repair order invoice / print update --- */
+.printSmall{
+  border-color:#bbf7d0;
+  background:#f0fdf4;
+  color:#166534;
+}
+
+.chargeHeading{
+  color:#111827;
+  font-size:18px;
+  margin:10px 0 8px;
+}
+
+.printNotice{
+  background:#f0fdf4;
+  border:1px solid #bbf7d0;
+  color:#166534;
+  border-radius:12px;
+  padding:12px 14px;
+  font-weight:900;
+}
+
+
+/* --- Stack Customers over Jobs workspace --- */
+.adminContent > h1{
+  font-size:clamp(44px,5vw,82px);
+  line-height:.95;
+  margin-bottom:24px;
+}
+
+.stackedWorkspace{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:24px;
+}
+
+.customersPanel,
+.jobsPanel{
+  width:100%;
+}
+
+.customersPanel .modernTableWrap,
+.jobsPanel .modernTableWrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+.customersPanel .workspaceTable,
+.jobsPanel .modernTable{
+  min-width:0;
+}
+
+.customersPanel .modernTable th,
+.customersPanel .modernTable td,
+.jobsPanel .modernTable th,
+.jobsPanel .modernTable td{
+  white-space:normal;
+  vertical-align:middle;
+}
+
+.customersPanel .modernTable th:nth-child(1),
+.customersPanel .modernTable td:nth-child(1){
+  width:28%;
+}
+
+.customersPanel .modernTable th:nth-child(2),
+.customersPanel .modernTable td:nth-child(2){
+  width:22%;
+}
+
+.customersPanel .modernTable th:nth-child(3),
+.customersPanel .modernTable td:nth-child(3),
+.customersPanel .modernTable th:nth-child(4),
+.customersPanel .modernTable td:nth-child(4){
+  width:12%;
+  text-align:center;
+}
+
+.jobsPanel .modernTable{
+  table-layout:auto;
+}
+
+.jobsPanel .modernTable th,
+.jobsPanel .modernTable td{
+  padding:14px 16px;
+}
+
+.jobsPanel .modernTable th:nth-child(1),
+.jobsPanel .modernTable td:nth-child(1){
+  min-width:110px;
+}
+
+.jobsPanel .modernTable th:nth-child(2),
+.jobsPanel .modernTable td:nth-child(2){
+  min-width:150px;
+}
+
+.jobsPanel .modernTable th:nth-child(3),
+.jobsPanel .modernTable td:nth-child(3){
+  min-width:160px;
+}
+
+.jobsPanel .modernTable th:nth-child(7),
+.jobsPanel .modernTable td:nth-child(7),
+.jobsPanel .modernTable th:nth-child(8),
+.jobsPanel .modernTable td:nth-child(8){
+  min-width:170px;
+}
+
+.customerTopBar{
+  display:grid !important;
+  grid-template-columns:minmax(260px,1fr) auto;
+  align-items:center;
+  gap:16px;
+}
+
+.customerTopBar .adminSearch{
+  max-width:none;
+  width:100%;
+}
+
+.topButtonGroup{
+  justify-content:flex-end;
+  flex-wrap:nowrap;
+}
+
+.topButtonGroup .btn{
+  white-space:nowrap;
+}
+
+.profilePanel{
+  padding:28px;
+}
+
+.panelTitle{
+  margin-bottom:20px;
+}
+
+.modernTableWrap{
+  border-radius:18px;
+}
+
+.actionCell{
+  min-width:220px;
+}
+
+@media(max-width:900px){
+  .customerTopBar{
+    grid-template-columns:1fr !important;
+  }
+
+  .topButtonGroup{
+    justify-content:stretch;
+    flex-direction:column;
+  }
+
+  .topButtonGroup .btn{
+    width:100%;
+  }
+
+  .adminContent > h1{
+    font-size:42px;
+  }
+}
