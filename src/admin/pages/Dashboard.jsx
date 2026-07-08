@@ -158,7 +158,7 @@ export default function Dashboard({ onOpenJob }) {
     <>
       <div className="dashboardHeader">
         <div>
-          <p className="profileEyebrow">Roger\'s Tire -N- Auto · Admin Portal</p>
+          <p className="profileEyebrow">Roger&apos;s Tire -N- Auto · Admin Portal</p>
           <h1>Dashboard</h1>
           <p>Today’s shop workload, jobs, revenue, and customer activity.</p>
         </div>

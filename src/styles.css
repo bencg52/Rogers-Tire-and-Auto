@@ -1799,3 +1799,37 @@ background:#f8f8f8;
   color:#ef3b3b !important;
   letter-spacing:.12em;
 }
+
+
+/* --- FINAL admin branding force fix --- */
+.adminSidebar .adminBrandBlock{
+  margin:0 0 34px;
+  padding:0;
+  color:#fff;
+}
+
+.adminSidebar .adminBrandMain{
+  font-size:22px;
+  line-height:1.08;
+  font-weight:950;
+  color:#fff;
+  max-width:190px;
+}
+
+.adminSidebar .adminBrandSub{
+  margin-top:8px;
+  color:#ef3b3b;
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.adminSidebar h2{
+  display:none;
+}
+
+.dashboardHeader .profileEyebrow{
+  color:#ef3b3b !important;
+  letter-spacing:.12em;
+}

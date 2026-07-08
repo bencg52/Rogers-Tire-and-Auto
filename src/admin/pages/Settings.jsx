@@ -8,7 +8,7 @@ export default function Settings() {
         <p>Use this button to leave the admin portal and return to the customer-facing website.</p>
 
         <a className="btn primary" href="/">
-          ← Back to Customer Website
+          ← Return to Customer Website
         </a>
       </div>
     </>

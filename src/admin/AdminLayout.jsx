@@ -32,10 +32,10 @@ export default function AdminLayout() {
 
       <aside className="adminSidebar">
 
-        <h2 className="adminBrandTitle">
-          <span>Roger's Tire -N- Auto</span>
-          <small>Admin Portal</small>
-        </h2>
+        <div className="adminBrandBlock">
+          <div className="adminBrandMain">Roger's Tire -N- Auto</div>
+          <div className="adminBrandSub">Admin Portal</div>
+        </div>
 
         <button onClick={() => setPage('dashboard')}>🏠 Dashboard</button>
         <button onClick={() => setPage('customers')}>👥 Customers</button>
