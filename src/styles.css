@@ -1767,3 +1767,35 @@ background:#f8f8f8;
   letter-spacing:.08em;
   text-transform:uppercase;
 }
+
+
+/* --- Exact admin brand fix --- */
+.adminSidebar .adminBrandTitle{
+  margin:0 0 34px;
+  padding:0;
+  line-height:1.05;
+  color:#fff;
+  text-transform:none;
+}
+
+.adminSidebar .adminBrandTitle span{
+  display:block;
+  font-size:25px;
+  font-weight:950;
+}
+
+.adminSidebar .adminBrandTitle small{
+  display:block;
+  margin-top:8px;
+  color:#ef3b3b;
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.dashboardHeader .profileEyebrow{
+  display:inline-block;
+  color:#ef3b3b !important;
+  letter-spacing:.12em;
+}
