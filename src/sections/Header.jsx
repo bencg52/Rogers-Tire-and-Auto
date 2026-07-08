@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Phone } from 'lucide-react'
 import { BUSINESS } from '../config/business'
 
@@ -25,7 +26,7 @@ export default function Header() {
         <a href="#about">About</a>
         <a href="#appointment">Appointments</a>
         <a href="#contact">Contact</a>
-        <a href="#login">Employee Login</a>
+        <Link className="adminNavButton" to="/admin">Admin</Link>
       </nav>
 
       <a className="phone" href={`tel:${BUSINESS.phoneLink}`}>
