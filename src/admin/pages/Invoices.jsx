@@ -171,7 +171,8 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
     const invoiceDate = job.opened_at ? new Date(job.opened_at).toLocaleDateString() : new Date().toLocaleDateString()
     const { subtotal, tax, total } = getInvoiceTotals(job)
 
-    const itemRows = Array.from({ length: 13 }).map((_, index) => {
+    const printableRowCount = Math.max(8, Math.min(12, Math.max(items.length, 1)))
+    const itemRows = Array.from({ length: printableRowCount }).map((_, index) => {
       const item = items[index]
       return `
         <tr>
@@ -190,33 +191,34 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
         <head>
           <title>Invoice ${escapeHtml(number)}</title>
           <style>
-            @page{size:letter;margin:0.33in 0.38in}
+            @page{size:letter portrait;margin:0.2in}
             *{box-sizing:border-box}
-            body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;margin:0;padding:0;font-size:12px}
-            .invoice{width:7.75in;min-height:10.25in;margin:0 auto;padding:0.08in 0}
-            .top{display:grid;grid-template-columns:1fr 2.45in;align-items:start;margin-bottom:0.12in}
-            .shop{font-size:17px;font-weight:700;line-height:1.13;padding-left:0.42in;padding-top:0.18in}
+            html,body{width:8.1in;height:10.6in;overflow:hidden}
+            body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;margin:0;padding:0;font-size:11.5px;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+            .invoice{width:8.0in;max-height:10.55in;margin:0 auto;padding:0.04in 0;background:#fff;overflow:hidden;break-after:avoid;page-break-after:avoid;break-inside:avoid;page-break-inside:avoid}
+            .top{display:grid;grid-template-columns:1fr 2.35in;align-items:start;margin-bottom:0.08in;break-inside:avoid;page-break-inside:avoid}
+            .shop{font-size:16px;font-weight:700;line-height:1.08;padding-left:0.42in;padding-top:0.1in}
             .shop div:not(:first-child){font-weight:500}
-            .invoiceTitle{text-align:right;font-size:30px;font-weight:900;margin:0.18in 0 0.06in 0;padding-right:0.05in}
-            .dateBox{width:2.22in;margin-left:auto;border-collapse:collapse;font-size:11px;text-align:center;table-layout:fixed}
-            .dateBox th,.dateBox td{border:1.25px solid #111;padding:6px 7px;height:0.25in}
-            .dateBox th{background:#d9d9d9;font-weight:800;font-size:10px}
-            .billTo{width:3.85in;height:1.06in;border:1.25px solid #111;margin-left:0.34in;margin-top:0.02in;margin-bottom:1.32in}
-            .billToHeader{text-align:center;border-bottom:1.25px solid #111;font-weight:800;font-size:10px;padding:3px 0;background:#d9d9d9;line-height:1}
-            .billToBody{padding:7px 10px;line-height:1.22;font-size:12px;min-height:0.83in}
-            .items{width:100%;border-collapse:collapse;table-layout:fixed;border:1.25px solid #111}
-            .items th{border:1.25px solid #111;background:#d9d9d9;font-size:10px;padding:4px 3px;text-align:center;font-weight:800;line-height:1}
-            .items td{border-left:1.25px solid #111;border-right:1.25px solid #111;height:0.43in;padding:5px 7px;vertical-align:top;font-size:12px}
-            .items tr:last-child td{border-bottom:1.25px solid #111}
-            .items .item{width:1.08in}.items .desc{width:3.55in}.items .qty{width:0.78in}.items .rate{width:1.05in}.items .amount{width:1.29in}
-            .bottom{display:grid;grid-template-columns:1fr 3.0in;margin-top:0;border-left:1.25px solid #111;border-bottom:1.25px solid #111;border-right:1.25px solid #111;min-height:1.02in}
-            .notes{border-right:1.25px solid #111;padding:9px 10px;white-space:pre-wrap;font-size:11px}
-            .totals{display:grid;grid-template-rows:0.31in 0.31in 0.4in}
-            .totals div{border-bottom:1.25px solid #111;padding:7px 9px;font-weight:700;line-height:1}
-            .totals div:last-child{border-bottom:0;background:#d9d9d9;font-size:28px;font-weight:900;display:flex;justify-content:space-between;align-items:center;padding-top:4px;padding-bottom:4px}
-            .totals span{float:right;font-size:12px;font-weight:700;margin-top:3px}
-            .totals div:last-child span{font-size:18px;font-weight:900;margin-top:0}
-            @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.invoice{margin:0 auto}}
+            .invoiceTitle{text-align:right;font-size:29px;font-weight:900;margin:0.1in 0 0.04in 0;padding-right:0.05in}
+            .dateBox{width:2.12in;margin-left:auto;border-collapse:collapse;font-size:10.5px;text-align:center;table-layout:fixed}
+            .dateBox th,.dateBox td{border:1.15px solid #111;padding:4px 6px;height:0.22in}
+            .dateBox th{background:#d9d9d9;font-weight:800;font-size:9.5px}
+            .billTo{width:3.85in;height:0.98in;border:1.15px solid #111;margin-left:0.34in;margin-top:0.02in;margin-bottom:0.72in;break-inside:avoid;page-break-inside:avoid}
+            .billToHeader{text-align:center;border-bottom:1.15px solid #111;font-weight:800;font-size:9.5px;padding:2px 0;background:#d9d9d9;line-height:1}
+            .billToBody{padding:6px 9px;line-height:1.14;font-size:11px;min-height:0.76in;overflow:hidden}
+            .items{width:100%;border-collapse:collapse;table-layout:fixed;border:1.15px solid #111;break-inside:avoid;page-break-inside:avoid}
+            .items th{border:1.15px solid #111;background:#d9d9d9;font-size:9.5px;padding:3px 3px;text-align:center;font-weight:800;line-height:1}
+            .items td{border-left:1.15px solid #111;border-right:1.15px solid #111;height:0.34in;padding:4px 6px;vertical-align:top;font-size:11px;line-height:1.1;overflow:hidden}
+            .items tr:last-child td{border-bottom:1.15px solid #111}
+            .items .item{width:1.08in}.items .desc{width:3.75in}.items .qty{width:0.72in}.items .rate{width:1.0in}.items .amount{width:1.23in}
+            .bottom{display:grid;grid-template-columns:1fr 2.95in;margin-top:0;border-left:1.15px solid #111;border-bottom:1.15px solid #111;border-right:1.15px solid #111;min-height:0.82in;break-inside:avoid;page-break-inside:avoid}
+            .notes{border-right:1.15px solid #111;padding:7px 9px;white-space:pre-wrap;font-size:10.5px;line-height:1.12;overflow:hidden}
+            .totals{display:grid;grid-template-rows:0.25in 0.25in 0.32in}
+            .totals div{border-bottom:1.15px solid #111;padding:5px 8px;font-weight:700;line-height:1}
+            .totals div:last-child{border-bottom:0;background:#d9d9d9;font-size:24px;font-weight:900;display:flex;justify-content:space-between;align-items:center;padding-top:3px;padding-bottom:3px}
+            .totals span{float:right;font-size:11px;font-weight:700;margin-top:1px}
+            .totals div:last-child span{font-size:16px;font-weight:900;margin-top:0}
+            @media print{html,body{height:10.6in;overflow:hidden}.invoice{margin:0 auto;transform:scale(.98);transform-origin:top center}}
           </style>
         </head>
         <body>
