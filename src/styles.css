@@ -2155,3 +2155,57 @@ background:#f8f8f8;
   .invoiceInlineStatus{width:100%;min-width:0;font-size:14px;padding:8px 12px}
   .invoiceModalTotals div{white-space:normal}
 }
+
+/* Labeled fields for Repair Order create/edit modal */
+.formField{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  width:100%;
+  min-width:0;
+}
+.formField.fullWidth{
+  width:100%;
+}
+.formField label{
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#334155;
+  margin-left:2px;
+}
+.formField select,
+.formField input,
+.formField textarea{
+  width:100%;
+  margin-bottom:0 !important;
+}
+.wideModal > .formField,
+.wideModal > select,
+.wideModal > textarea{
+  margin-bottom:12px;
+}
+.wideModal .modalGrid{
+  margin-bottom:12px;
+}
+.lineItemHeaderRow{
+  display:grid;
+  grid-template-columns:minmax(66px,.7fr) minmax(180px,2fr) minmax(70px,.7fr) minmax(85px,.9fr) minmax(95px,1fr) minmax(82px,auto);
+  gap:8px;
+  align-items:center;
+  width:100%;
+  padding:0 2px 2px;
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#334155;
+}
+.lineItemHeaderRow span{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+@media(max-width:900px){
+  .lineItemHeaderRow{display:none}
+}

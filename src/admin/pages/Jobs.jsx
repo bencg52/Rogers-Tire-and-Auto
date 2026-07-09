@@ -752,45 +752,77 @@ export default function Jobs({ openJobId, onJobOpened }) {
 
             <h2>{editingJob ? `Edit ${editingJob.ro_number}` : 'Quick Job / Walk-In'}</h2>
 
-            <select value={jobForm.customerId} onChange={(e) => setJobForm({ ...jobForm, customerId: e.target.value, vehicleId: '' })}>
-              <option value="">Walk-In / No Customer</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>{customerName(c)}</option>
-              ))}
-            </select>
-
-            <select value={jobForm.vehicleId} onChange={(e) => setJobForm({ ...jobForm, vehicleId: e.target.value })}>
-              <option value="">No Vehicle Attached</option>
-              {availableVehicles.map((v) => (
-                <option key={v.id} value={v.id}>{vehicleName(v)}</option>
-              ))}
-            </select>
-
-            <select value={jobForm.status} onChange={(e) => setJobForm({ ...jobForm, status: e.target.value })}>
-              {jobStatuses.map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-
-            <div className="modalGrid">
-              <input placeholder="Technician" value={jobForm.technician} onChange={(e) => setJobForm({ ...jobForm, technician: e.target.value })} />
-              <input placeholder="Mileage In" value={jobForm.mileage} onChange={(e) => setJobForm({ ...jobForm, mileage: e.target.value })} />
+            <div className="formField fullWidth">
+              <label>Customer</label>
+              <select value={jobForm.customerId} onChange={(e) => setJobForm({ ...jobForm, customerId: e.target.value, vehicleId: '' })}>
+                <option value="">Walk-In / No Customer</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>{customerName(c)}</option>
+                ))}
+              </select>
             </div>
 
-            <textarea placeholder="Customer Complaint / Issue" value={jobForm.complaint} onChange={(e) => setJobForm({ ...jobForm, complaint: e.target.value })} />
-            <textarea placeholder="Diagnosis" value={jobForm.diagnosis} onChange={(e) => setJobForm({ ...jobForm, diagnosis: e.target.value })} />
-            <textarea placeholder="Repairs Performed" value={jobForm.repairs} onChange={(e) => setJobForm({ ...jobForm, repairs: e.target.value })} />
+            <div className="formField fullWidth">
+              <label>Vehicle</label>
+              <select value={jobForm.vehicleId} onChange={(e) => setJobForm({ ...jobForm, vehicleId: e.target.value })}>
+                <option value="">No Vehicle Attached</option>
+                {availableVehicles.map((v) => (
+                  <option key={v.id} value={v.id}>{vehicleName(v)}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="formField fullWidth">
+              <label>Status</label>
+              <select value={jobForm.status} onChange={(e) => setJobForm({ ...jobForm, status: e.target.value })}>
+                {jobStatuses.map((status) => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="modalGrid">
+              <div className="formField">
+                <label>Technician</label>
+                <input placeholder="Technician" value={jobForm.technician} onChange={(e) => setJobForm({ ...jobForm, technician: e.target.value })} />
+              </div>
+              <div className="formField">
+                <label>Mileage In</label>
+                <input placeholder="Mileage In" value={jobForm.mileage} onChange={(e) => setJobForm({ ...jobForm, mileage: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="formField fullWidth">
+              <label>Customer Complaint / Issue</label>
+              <textarea placeholder="Customer Complaint / Issue" value={jobForm.complaint} onChange={(e) => setJobForm({ ...jobForm, complaint: e.target.value })} />
+            </div>
+            <div className="formField fullWidth">
+              <label>Diagnosis</label>
+              <textarea placeholder="Diagnosis" value={jobForm.diagnosis} onChange={(e) => setJobForm({ ...jobForm, diagnosis: e.target.value })} />
+            </div>
+            <div className="formField fullWidth">
+              <label>Repairs Performed</label>
+              <textarea placeholder="Repairs Performed" value={jobForm.repairs} onChange={(e) => setJobForm({ ...jobForm, repairs: e.target.value })} />
+            </div>
 
             <h3 className="chargeHeading">Invoice Line Items</h3>
 
             <div className="lineItemsEditor">
+              <div className="lineItemHeaderRow">
+                <span>Item</span>
+                <span>Description</span>
+                <span>Qty</span>
+                <span>Rate</span>
+                <span>Amount</span>
+                <span>Action</span>
+              </div>
               {(jobForm.lineItems || []).map((item, index) => (
                 <div className="lineItemRow" key={index}>
-                  <input placeholder="Item" value={item.item} onChange={(e) => updateLineItem(index, 'item', e.target.value)} />
-                  <input className="lineDesc" placeholder="Description" value={item.description} onChange={(e) => updateLineItem(index, 'description', e.target.value)} />
-                  <input type="number" step="0.01" placeholder="Qty" value={item.qty} onChange={(e) => updateLineItem(index, 'qty', e.target.value)} />
-                  <input type="number" step="0.01" placeholder="Rate" value={item.rate} onChange={(e) => updateLineItem(index, 'rate', e.target.value)} />
-                  <input type="number" step="0.01" placeholder="Amount" value={item.amount} onChange={(e) => updateLineItem(index, 'amount', e.target.value)} />
+                  <input aria-label="Item" placeholder="Item" value={item.item} onChange={(e) => updateLineItem(index, 'item', e.target.value)} />
+                  <input aria-label="Description" className="lineDesc" placeholder="Description" value={item.description} onChange={(e) => updateLineItem(index, 'description', e.target.value)} />
+                  <input aria-label="Quantity" type="number" step="0.01" placeholder="Qty" value={item.qty} onChange={(e) => updateLineItem(index, 'qty', e.target.value)} />
+                  <input aria-label="Rate" type="number" step="0.01" placeholder="Rate" value={item.rate} onChange={(e) => updateLineItem(index, 'rate', e.target.value)} />
+                  <input aria-label="Amount" type="number" step="0.01" placeholder="Amount" value={item.amount} onChange={(e) => updateLineItem(index, 'amount', e.target.value)} />
                   <button type="button" className="smallBtn dangerSmall" onClick={() => removeLineItem(index)}>Remove</button>
                 </div>
               ))}
