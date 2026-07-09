@@ -219,7 +219,6 @@ export default function Dashboard({ onOpenJob, onOpenJobs, onOpenCustomers, onOp
           <div className="dashboardLowerGrid">
             <section className="profilePanel">
               <div className="panelTitle">
-                <span>ðŸ’°</span>
                 <h2>Revenue Snapshot</h2>
               </div>
 
@@ -244,7 +243,6 @@ export default function Dashboard({ onOpenJob, onOpenJobs, onOpenCustomers, onOp
 
             <section className="profilePanel">
               <div className="panelTitle">
-                <span>ðŸ”§</span>
                 <h2>Recent Jobs</h2>
               </div>
 
