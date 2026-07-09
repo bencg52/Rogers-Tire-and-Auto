@@ -28,6 +28,7 @@ const emptyJob = {
   id: null,
   customerId: '',
   vehicleId: '',
+  walkInVehicle: '',
   technician: '',
   mileage: '',
   complaint: '',
@@ -107,6 +108,12 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   function vehicleName(v) {
     if (!v) return 'No Vehicle Attached'
     return `${v.year || ''} ${v.make || ''} ${v.model || ''}`.trim() || 'Vehicle'
+  }
+
+  function jobVehicleName(job, vehicle) {
+    return vehicleName(vehicle) === 'No Vehicle Attached'
+      ? (job?.walk_in_vehicle || 'No Vehicle Attached')
+      : vehicleName(vehicle)
   }
 
   function calculateSubtotal(items = jobForm.lineItems || []) {
@@ -323,6 +330,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
         id: job.id,
         customerId: job.customer_id || '',
         vehicleId: job.vehicle_id || '',
+        walkInVehicle: job.walk_in_vehicle || '',
         technician: job.technician || '',
         mileage: job.mileage_in || '',
         complaint: job.customer_complaint || '',
@@ -394,7 +402,8 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
       const lineItems = jobForm.lineItems || []
       const payload = {
         customer_id: jobForm.customerId || null,
-        vehicle_id: jobForm.vehicleId || null,
+        vehicle_id: jobForm.customerId ? (jobForm.vehicleId || null) : null,
+        walk_in_vehicle: jobForm.customerId ? '' : jobForm.walkInVehicle,
         technician: jobForm.technician,
         mileage_in: jobForm.mileage,
         customer_complaint: jobForm.complaint,
@@ -516,6 +525,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   function buildInvoiceHtml(job, autoPrint = false) {
     const customer = customers.find((c) => c.id === job.customer_id)
     const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
+    const displayVehicle = jobVehicleName(job, vehicle)
     const items = invoiceItemsByJob[job.id] || []
     const invoiceNumber = String(job.ro_number || '').replace('RO-', '') || '17919'
     const invoiceDate = job.opened_at ? new Date(job.opened_at).toLocaleDateString() : new Date().toLocaleDateString()
@@ -595,7 +605,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
                 <strong>${escapeHtml(customerName(customer))}</strong><br />
                 ${escapeHtml(customer?.phone || '')}<br />
                 ${escapeHtml(customer?.address || '')}<br />
-                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}${job.mileage_in ? '<br />Mileage In: ' + escapeHtml(job.mileage_in) : ''}
+                ${escapeHtml(displayVehicle)}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}${job.mileage_in ? '<br />Mileage In: ' + escapeHtml(job.mileage_in) : ''}
               </div>
             </div>
 
@@ -630,13 +640,13 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   const filteredJobs = jobs.filter((job) => {
     const customer = customers.find((c) => c.id === job.customer_id)
     const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
-    const text = `${job.ro_number || ''} ${customerName(customer)} ${vehicleName(vehicle)} ${job.status || ''} ${job.technician || ''} ${job.mileage_in || ''}`.toLowerCase()
+    const text = `${job.ro_number || ''} ${customerName(customer)} ${jobVehicleName(job, vehicle)} ${job.status || ''} ${job.technician || ''} ${job.mileage_in || ''}`.toLowerCase()
     return text.includes(search.toLowerCase())
   })
 
   const availableVehicles = jobForm.customerId
     ? vehicles.filter((v) => v.customer_id === jobForm.customerId)
-    : vehicles
+    : []
 
   return (
     <>
@@ -700,7 +710,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
                     <tr key={job.id}>
                       <td><strong>{job.ro_number}</strong></td>
                       <td>{customerName(customer)}</td>
-                      <td>{vehicleName(vehicle)}</td>
+                      <td>{jobVehicleName(job, vehicle)}</td>
                       <td>
                         <select
                           className={`inlineStatus ${String(job.status || 'Open').toLowerCase().replaceAll(' ', '-')}`}
@@ -799,7 +809,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
 
             <div className="formField fullWidth">
               <label>Customer</label>
-              <select value={jobForm.customerId} onChange={(e) => setJobForm({ ...jobForm, customerId: e.target.value, vehicleId: '' })}>
+              <select value={jobForm.customerId} onChange={(e) => setJobForm({ ...jobForm, customerId: e.target.value, vehicleId: '', walkInVehicle: e.target.value ? '' : jobForm.walkInVehicle })}>
                 <option value="">Walk-In / No Customer</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>{customerName(c)}</option>
@@ -809,12 +819,20 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
 
             <div className="formField fullWidth">
               <label>Vehicle</label>
-              <select value={jobForm.vehicleId} onChange={(e) => setJobForm({ ...jobForm, vehicleId: e.target.value })}>
-                <option value="">No Vehicle Attached</option>
-                {availableVehicles.map((v) => (
-                  <option key={v.id} value={v.id}>{vehicleName(v)}</option>
-                ))}
-              </select>
+              {jobForm.customerId ? (
+                <select value={jobForm.vehicleId} onChange={(e) => setJobForm({ ...jobForm, vehicleId: e.target.value })}>
+                  <option value="">No Vehicle Attached</option>
+                  {availableVehicles.map((v) => (
+                    <option key={v.id} value={v.id}>{vehicleName(v)}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  placeholder="Type vehicle for walk-in, ex: 2020 RAM 1500"
+                  value={jobForm.walkInVehicle}
+                  onChange={(e) => setJobForm({ ...jobForm, walkInVehicle: e.target.value, vehicleId: '' })}
+                />
+              )}
             </div>
 
             <div className="formField fullWidth">

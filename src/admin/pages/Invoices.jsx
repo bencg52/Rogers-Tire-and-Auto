@@ -35,6 +35,12 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
     return `${v.year || ''} ${v.make || ''} ${v.model || ''}`.trim() || 'Vehicle'
   }
 
+  function jobVehicleName(job, vehicle) {
+    return vehicleName(vehicle) === 'No Vehicle Attached'
+      ? (job?.walk_in_vehicle || 'No Vehicle Attached')
+      : vehicleName(vehicle)
+  }
+
   function invoiceNumber(job) {
     return String(job?.ro_number || '').replace('RO-', '') || '-'
   }
@@ -159,6 +165,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
   function printInvoice(job) {
     const customer = customers.find((c) => c.id === job.customer_id)
     const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
+    const displayVehicle = jobVehicleName(job, vehicle)
     const items = invoiceItemsByJob[job.id] || []
     const number = invoiceNumber(job)
     const invoiceDate = job.opened_at ? new Date(job.opened_at).toLocaleDateString() : new Date().toLocaleDateString()
@@ -236,7 +243,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
                 <strong>${escapeHtml(customerName(customer))}</strong><br />
                 ${escapeHtml(customer?.phone || '')}<br />
                 ${escapeHtml(customer?.address || '')}<br />
-                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}${job.mileage_in ? '<br />Mileage In: ' + escapeHtml(job.mileage_in) : ''}
+                ${escapeHtml(displayVehicle)}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}${job.mileage_in ? '<br />Mileage In: ' + escapeHtml(job.mileage_in) : ''}
               </div>
             </div>
 
@@ -274,7 +281,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
   }), [jobs, customers, vehicles, invoiceItemsByJob])
 
   const filteredInvoices = invoiceRows.filter(({ job, customer, vehicle, status }) => {
-    const text = `${invoiceNumber(job)} ${job.ro_number || ''} ${customerName(customer)} ${vehicleName(vehicle)} ${job.mileage_in || ''} ${status}`.toLowerCase()
+    const text = `${invoiceNumber(job)} ${job.ro_number || ''} ${customerName(customer)} ${jobVehicleName(job, vehicle)} ${job.mileage_in || ''} ${status}`.toLowerCase()
     const matchesSearch = text.includes(search.toLowerCase())
     const matchesStatus = statusFilter === 'All' || status === statusFilter
     return matchesSearch && matchesStatus
@@ -342,7 +349,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
                     <td><strong>{invoiceNumber(job)}</strong></td>
                     <td>{job.ro_number || '-'}</td>
                     <td>{customerName(customer)}</td>
-                    <td>{vehicleName(vehicle)}</td>
+                    <td>{jobVehicleName(job, vehicle)}</td>
                     <td>{job.mileage_in || '-'}</td>
                     <td>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</td>
                     <td>
@@ -385,7 +392,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
               <div className="invoiceSummaryGrid">
                 <div><strong>RO #</strong><span>{job.ro_number || '-'}</span></div>
                 <div><strong>Customer</strong><span>{customerName(customer)}</span></div>
-                <div><strong>Vehicle</strong><span>{vehicleName(vehicle)}</span></div>
+                <div><strong>Vehicle</strong><span>{jobVehicleName(job, vehicle)}</span></div>
                 <div><strong>Mileage In</strong><span>{job.mileage_in || '-'}</span></div>
                 <div>
                   <strong>Status</strong>
