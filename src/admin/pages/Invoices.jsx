@@ -236,7 +236,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
                 <strong>${escapeHtml(customerName(customer))}</strong><br />
                 ${escapeHtml(customer?.phone || '')}<br />
                 ${escapeHtml(customer?.address || '')}<br />
-                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}
+                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}${job.mileage_in ? '<br />Mileage In: ' + escapeHtml(job.mileage_in) : ''}
               </div>
             </div>
 
@@ -274,7 +274,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
   }), [jobs, customers, vehicles, invoiceItemsByJob])
 
   const filteredInvoices = invoiceRows.filter(({ job, customer, vehicle, status }) => {
-    const text = `${invoiceNumber(job)} ${job.ro_number || ''} ${customerName(customer)} ${vehicleName(vehicle)} ${status}`.toLowerCase()
+    const text = `${invoiceNumber(job)} ${job.ro_number || ''} ${customerName(customer)} ${vehicleName(vehicle)} ${job.mileage_in || ''} ${status}`.toLowerCase()
     const matchesSearch = text.includes(search.toLowerCase())
     const matchesStatus = statusFilter === 'All' || status === statusFilter
     return matchesSearch && matchesStatus
@@ -289,7 +289,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
       <div className="pageHeader customerTopBar">
         <input
           className="adminSearch"
-          placeholder="Search invoices by invoice #, RO #, customer, vehicle, or status..."
+          placeholder="Search invoices by invoice #, RO #, customer, vehicle, mileage, or status..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -323,6 +323,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
                 <th>RO #</th>
                 <th>Customer</th>
                 <th>Vehicle</th>
+                <th>Mileage In</th>
                 <th>Date</th>
                 <th>Status</th>
                 <th>Total</th>
@@ -333,7 +334,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
             <tbody>
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan="8">No saved invoices found.</td>
+                  <td colSpan="9">No saved invoices found.</td>
                 </tr>
               ) : (
                 filteredInvoices.map(({ job, customer, vehicle, totals, status }) => (
@@ -342,6 +343,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
                     <td>{job.ro_number || '-'}</td>
                     <td>{customerName(customer)}</td>
                     <td>{vehicleName(vehicle)}</td>
+                    <td>{job.mileage_in || '-'}</td>
                     <td>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</td>
                     <td>
                       <select
@@ -384,6 +386,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
                 <div><strong>RO #</strong><span>{job.ro_number || '-'}</span></div>
                 <div><strong>Customer</strong><span>{customerName(customer)}</span></div>
                 <div><strong>Vehicle</strong><span>{vehicleName(vehicle)}</span></div>
+                <div><strong>Mileage In</strong><span>{job.mileage_in || '-'}</span></div>
                 <div>
                   <strong>Status</strong>
                   <select

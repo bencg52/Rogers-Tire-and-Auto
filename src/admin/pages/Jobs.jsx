@@ -595,7 +595,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
                 <strong>${escapeHtml(customerName(customer))}</strong><br />
                 ${escapeHtml(customer?.phone || '')}<br />
                 ${escapeHtml(customer?.address || '')}<br />
-                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}
+                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}${job.mileage_in ? '<br />Mileage In: ' + escapeHtml(job.mileage_in) : ''}
               </div>
             </div>
 
@@ -630,7 +630,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   const filteredJobs = jobs.filter((job) => {
     const customer = customers.find((c) => c.id === job.customer_id)
     const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
-    const text = `${job.ro_number || ''} ${customerName(customer)} ${vehicleName(vehicle)} ${job.status || ''} ${job.technician || ''}`.toLowerCase()
+    const text = `${job.ro_number || ''} ${customerName(customer)} ${vehicleName(vehicle)} ${job.status || ''} ${job.technician || ''} ${job.mileage_in || ''}`.toLowerCase()
     return text.includes(search.toLowerCase())
   })
 
@@ -647,7 +647,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
       <div className="pageHeader customerTopBar">
         <input
           className="adminSearch"
-          placeholder="Search jobs by RO, customer, vehicle, status, technician..."
+          placeholder="Search jobs by RO, customer, vehicle, status, technician, mileage..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -680,6 +680,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
                 <th>Vehicle</th>
                 <th>Status</th>
                 <th>Technician</th>
+                <th>Mileage In</th>
                 <th>Total</th>
                 <th>Opened</th>
                 <th>Actions</th>
@@ -689,7 +690,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
             <tbody>
               {filteredJobs.length === 0 ? (
                 <tr>
-                  <td colSpan="8">No jobs found.</td>
+                  <td colSpan="9">No jobs found.</td>
                 </tr>
               ) : (
                 filteredJobs.map((job) => {
@@ -712,6 +713,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
                         </select>
                       </td>
                       <td>{job.technician || '-'}</td>
+                      <td>{job.mileage_in || '-'}</td>
                       <td>${money(job.total)}</td>
                       <td>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</td>
                       <td className="actionCell">
