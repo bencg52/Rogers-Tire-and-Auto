@@ -2245,3 +2245,30 @@ button.dashboardGaugeCard,
   font:inherit;
   text-align:left;
 }
+
+/* Center dropdown text across the admin system */
+.adminShell select,
+.modalCard select,
+.detailCard select,
+.formField select,
+.inlineStatus,
+.invoiceInlineStatus{
+  text-align:center;
+  text-align-last:center;
+}
+.adminShell select option,
+.modalCard select option,
+.detailCard select option,
+.formField select option,
+.invoiceInlineStatus option{
+  text-align:center;
+}
+
+/* Keep invoice status pills clean and centered */
+.invoiceInlineStatus{
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  padding-left:18px;
+  padding-right:18px;
+}
