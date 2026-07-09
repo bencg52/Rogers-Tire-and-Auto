@@ -34,6 +34,17 @@ const fallbackServices = [
   { service_name: 'Engine Repair', category: 'Engine', description: 'Engine performance, leaks, belts, hoses, and repair work.', base_price: 149.99 }
 ]
 
+function dedupeServices(serviceList) {
+  const seen = new Set()
+
+  return serviceList.filter((service) => {
+    const key = String(service.service_name || '').trim().toLowerCase()
+    if (!key || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 function ServiceIcon({ category, name }) {
   const text = `${category || ''} ${name || ''}`.toLowerCase()
 
@@ -68,7 +79,7 @@ function PublicSite() {
         .eq('active', true)
         .order('service_name')
 
-      setServices(error || !data?.length ? fallbackServices : data)
+      setServices(dedupeServices(error || !data?.length ? fallbackServices : data))
       setLoading(false)
     }
 
