@@ -248,6 +248,26 @@ export default function Customers({ onOpenJob }) {
     showSuccess('Status updated')
   }
 
+
+  async function deleteVehicle(vehicleId) {
+    if (!confirm('Delete this vehicle from this customer?')) return
+
+    setErrorMsg('')
+
+    const { error } = await supabase
+      .from('admin_vehicles')
+      .delete()
+      .eq('id', vehicleId)
+
+    if (error) {
+      setErrorMsg(error.message)
+      return
+    }
+
+    setVehicles(vehicles.filter((v) => v.id !== vehicleId))
+    showSuccess('Vehicle deleted')
+  }
+
   async function deleteCustomer() {
     if (!confirm('Delete this customer? Existing vehicles and jobs may remain depending on database rules.')) return
 
@@ -386,6 +406,7 @@ export default function Customers({ onOpenJob }) {
                       <th>VIN</th>
                       <th>Mileage</th>
                       <th>Status</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
 
@@ -396,6 +417,9 @@ export default function Customers({ onOpenJob }) {
                         <td>{v.vin || '-'}</td>
                         <td>{v.mileage || '-'}</td>
                         <td><span className="statusPill">{v.status || 'Active'}</span></td>
+                        <td>
+                          <button className="btn dangerBtn smallBtn" onClick={() => deleteVehicle(v.id)}>Delete</button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
