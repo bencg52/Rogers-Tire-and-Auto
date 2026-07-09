@@ -2354,9 +2354,7 @@ button.dashboardGaugeCard,
 
 /* --- Modern Industrial Admin Theme --- */
 .adminShell{
-  background:
-    radial-gradient(circle at top left, rgba(239,59,59,.10), transparent 28%),
-    linear-gradient(135deg,#eef2f6 0%,#f8fafc 45%,#e5e9ef 100%) !important;
+  background:#26313d !important;
   color:#111827;
 }
 
