@@ -2322,3 +2322,199 @@ button.dashboardGaugeCard,
   color:#991b1b;
   border:1px solid #fecaca;
 }
+
+/* --- Modern Industrial Admin Theme --- */
+.adminShell{
+  background:
+    radial-gradient(circle at top left, rgba(239,59,59,.10), transparent 28%),
+    linear-gradient(135deg,#eef2f6 0%,#f8fafc 45%,#e5e9ef 100%) !important;
+  color:#111827;
+}
+
+.adminSidebar{
+  background:
+    linear-gradient(180deg,#111827 0%,#0b1220 65%,#070b12 100%) !important;
+  border-right:1px solid rgba(255,255,255,.08);
+  box-shadow:12px 0 36px rgba(15,23,42,.18);
+}
+
+.adminSidebar::before{
+  content:"";
+  height:4px;
+  width:100%;
+  background:linear-gradient(90deg,#ef3b3b,#f59e0b,#ef3b3b);
+  position:absolute;
+  left:0;
+  top:0;
+}
+
+.adminSidebar{position:relative;}
+
+.adminSidebar .adminBrandBlock{
+  padding:4px 0 22px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  margin-bottom:22px;
+}
+
+.adminSidebar .adminBrandMain{
+  font-size:21px;
+  letter-spacing:.01em;
+  text-shadow:0 3px 16px rgba(0,0,0,.35);
+}
+
+.adminSidebar .adminBrandSub{
+  color:#ff4b4b;
+}
+
+.adminSidebar button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#e5e7eb !important;
+  border:1px solid transparent !important;
+  font-weight:850;
+}
+
+.adminSidebar button:hover{
+  background:linear-gradient(90deg,rgba(239,59,59,.95),rgba(185,28,28,.95)) !important;
+  border-color:rgba(255,255,255,.14) !important;
+  transform:translateX(3px);
+}
+
+.adminSiteLink{
+  background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03)) !important;
+  border-color:rgba(255,255,255,.16) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.adminContent{
+  padding:34px 44px !important;
+}
+
+.adminContent > h1,
+.dashboardHeader h1{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  width:auto;
+  max-width:100%;
+  margin:0 0 22px !important;
+  padding:14px 20px 14px 18px;
+  border-left:7px solid #ef3b3b;
+  border-radius:0 18px 18px 0;
+  background:
+    linear-gradient(90deg,#111827 0%,#1f2937 72%,#374151 100%);
+  color:#fff !important;
+  font-size:clamp(26px,2.4vw,38px) !important;
+  line-height:1.05 !important;
+  letter-spacing:.02em !important;
+  text-align:left !important;
+  text-shadow:none !important;
+  box-shadow:0 16px 35px rgba(15,23,42,.18);
+}
+
+.adminContent > h1::before,
+.dashboardHeader h1::before{
+  content:"🔩";
+  font-size:.78em;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));
+}
+
+.adminContent:has(.customerTopBar) > h1::before{content:"👥";}
+.adminContent:has(.jobsPanel) > h1::before{content:"🔧";}
+.adminContent:has(.settingsForm) > h1::before{content:"⚙️";}
+.dashboardHeader h1::before{content:"🏁";}
+
+.dashboardHeader{
+  align-items:center;
+  padding:0 0 10px;
+  border-bottom:1px solid rgba(15,23,42,.08);
+}
+
+.dashboardHeader p{
+  color:#475569 !important;
+  font-size:15px;
+}
+
+.adminSearch,
+.miniSearch{
+  border:1px solid #cfd7e3 !important;
+  border-radius:14px !important;
+  background:#fff !important;
+  box-shadow:0 10px 28px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+
+.detailCard,
+.profilePanel,
+.dashboardKpi,
+.dashboardGaugeCard{
+  border:1px solid #dbe3ee !important;
+  border-top:5px solid #ef3b3b !important;
+  background:
+    linear-gradient(180deg,#fff 0%,#fbfdff 100%) !important;
+  box-shadow:0 18px 50px rgba(15,23,42,.10) !important;
+}
+
+.detailCard h2,
+.profilePanel h2,
+.panelTitle h2{
+  color:#0f172a !important;
+  letter-spacing:-.02em;
+}
+
+.modernTableWrap{
+  border:1px solid #dbe3ee !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.05);
+}
+
+.modernTable th,
+.adminTable th{
+  background:linear-gradient(180deg,#f8fafc,#edf2f7) !important;
+  color:#1e293b !important;
+  border-bottom:1px solid #dbe3ee !important;
+}
+
+.modernTable tbody tr:nth-child(even) td,
+.adminTable tbody tr:nth-child(even) td{
+  background:#fbfdff !important;
+}
+
+.modernTable tbody tr:hover td,
+.adminTable tbody tr:hover td{
+  background:#f1f5f9 !important;
+}
+
+.btn.primary,
+.smallBtn.primary{
+  background:linear-gradient(180deg,#ff4b4b,#dc2626) !important;
+  border-color:#dc2626 !important;
+  box-shadow:0 10px 22px rgba(220,38,38,.22);
+}
+
+.smallBtn,
+.btn.secondary{
+  box-shadow:0 8px 18px rgba(15,23,42,.06);
+}
+
+.dashboardKpi strong,
+.dashboardGauge strong{
+  color:#0f172a !important;
+}
+
+.dashboardGauge{
+  box-shadow:inset 0 0 0 1px rgba(15,23,42,.08), 0 16px 36px rgba(15,23,42,.12);
+}
+
+.statusPill,
+.inlineStatus,
+.invoiceInlineStatus{
+  box-shadow:inset 0 0 0 1px rgba(15,23,42,.08), 0 6px 14px rgba(15,23,42,.06) !important;
+}
+
+@media(max-width:900px){
+  .adminShell{display:block;height:auto;min-height:100vh;}
+  .adminSidebar{width:100%;min-height:auto;}
+  .adminContent{padding:24px 18px !important;}
+  .adminContent > h1,
+  .dashboardHeader h1{font-size:26px !important;}
+}
