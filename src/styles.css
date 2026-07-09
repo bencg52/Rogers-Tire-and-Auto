@@ -2272,3 +2272,53 @@ button.dashboardGaugeCard,
   padding-left:18px;
   padding-right:18px;
 }
+
+/* Shop settings + currency field polish */
+.currencyInput{
+  position:relative;
+  display:flex;
+  align-items:center;
+  width:100%;
+  min-width:0;
+}
+.currencyInput span{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  font-weight:900;
+  color:#334155;
+  pointer-events:none;
+  z-index:1;
+}
+.currencyInput input{
+  width:100% !important;
+  padding-left:28px !important;
+}
+.settingsForm{
+  display:grid;
+  gap:16px;
+  max-width:520px;
+  margin-top:14px;
+}
+.settingsForm small{
+  color:#64748b;
+  font-weight:700;
+}
+.successBanner,
+.errorBanner{
+  border-radius:12px;
+  padding:14px 16px;
+  margin:0 0 16px;
+  font-weight:900;
+}
+.successBanner{
+  background:#dcfce7;
+  color:#166534;
+  border:1px solid #bbf7d0;
+}
+.errorBanner{
+  background:#fee2e2;
+  color:#991b1b;
+  border:1px solid #fecaca;
+}

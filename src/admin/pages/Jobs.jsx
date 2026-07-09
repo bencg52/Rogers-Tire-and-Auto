@@ -18,6 +18,12 @@ const emptyVehicle = {
 
 const jobStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts', 'Completed', 'Picked Up', 'Cancelled']
 
+const DEFAULT_SHOP_SETTINGS = {
+  laborRate: 175,
+  taxRate: 0.06
+}
+
+
 const emptyJob = {
   id: null,
   customerId: '',
@@ -53,9 +59,11 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   const [successMsg, setSuccessMsg] = useState('')
   const [isSavingJob, setIsSavingJob] = useState(false)
   const [selectedPdfJob, setSelectedPdfJob] = useState(null)
+  const [shopSettings, setShopSettings] = useState(DEFAULT_SHOP_SETTINGS)
 
   useEffect(() => {
     loadData()
+    loadShopSettings()
   }, [])
 
   useEffect(() => {
@@ -82,6 +90,15 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
     return Number(value || 0).toFixed(2)
   }
 
+  function cleanMoneyValue(value) {
+    return String(value ?? '').replace(/[$,]/g, '')
+  }
+
+  function isLaborLine(item) {
+    const text = `${item?.item || ''} ${item?.description || ''}`.toLowerCase().trim()
+    return text === 'labor' || text.includes(' labor') || text.startsWith('labor')
+  }
+
   function customerName(c) {
     if (!c) return 'Walk-In / No Customer'
     return `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Unnamed Customer'
@@ -97,7 +114,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   }
 
   function calculateTax(items = jobForm.lineItems || []) {
-    return (calculateSubtotal(items) * 0.06).toFixed(2)
+    return (calculateSubtotal(items) * Number(shopSettings.taxRate || DEFAULT_SHOP_SETTINGS.taxRate)).toFixed(2)
   }
 
   function calculateTotalFromItems(items = jobForm.lineItems || []) {
@@ -105,11 +122,18 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   }
 
   function updateLineItem(index, field, value) {
+    const cleanedValue = ['rate', 'amount'].includes(field) ? cleanMoneyValue(value) : value
+
     const nextItems = (jobForm.lineItems || []).map((item, itemIndex) => {
       if (itemIndex !== index) return item
 
-      const nextItem = { ...item, [field]: value }
-      if (field === 'qty' || field === 'rate') {
+      const nextItem = { ...item, [field]: cleanedValue }
+
+      if ((field === 'description' || field === 'item') && isLaborLine(nextItem) && !Number(nextItem.rate || 0)) {
+        nextItem.rate = String(shopSettings.laborRate || DEFAULT_SHOP_SETTINGS.laborRate)
+      }
+
+      if (field === 'qty' || field === 'rate' || ((field === 'description' || field === 'item') && isLaborLine(nextItem))) {
         nextItem.amount = (Number(nextItem.qty || 0) * Number(nextItem.rate || 0)).toFixed(2)
       }
       return nextItem
@@ -145,6 +169,21 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
       tax: calculateTax(nextItems),
       total: calculateTotalFromItems(nextItems)
     })
+  }
+
+  async function loadShopSettings() {
+    const { data, error } = await supabase
+      .from('admin_shop_settings')
+      .select('shop_labor_rate, sales_tax_rate')
+      .eq('id', 1)
+      .maybeSingle()
+
+    if (!error && data) {
+      setShopSettings({
+        laborRate: Number(data.shop_labor_rate || DEFAULT_SHOP_SETTINGS.laborRate),
+        taxRate: Number(data.sales_tax_rate || DEFAULT_SHOP_SETTINGS.taxRate)
+      })
+    }
   }
 
   async function loadData() {
@@ -825,8 +864,8 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
                   <input aria-label="Item" placeholder="Item" value={item.item} onChange={(e) => updateLineItem(index, 'item', e.target.value)} />
                   <input aria-label="Description" className="lineDesc" placeholder="Description" value={item.description} onChange={(e) => updateLineItem(index, 'description', e.target.value)} />
                   <input aria-label="Quantity" type="number" step="0.01" placeholder="Qty" value={item.qty} onChange={(e) => updateLineItem(index, 'qty', e.target.value)} />
-                  <input aria-label="Rate" type="number" step="0.01" placeholder="Rate" value={item.rate} onChange={(e) => updateLineItem(index, 'rate', e.target.value)} />
-                  <input aria-label="Amount" type="number" step="0.01" placeholder="Amount" value={item.amount} onChange={(e) => updateLineItem(index, 'amount', e.target.value)} />
+                  <div className="currencyInput"><span>$</span><input aria-label="Rate" type="number" step="0.01" placeholder="Rate" value={item.rate} onChange={(e) => updateLineItem(index, 'rate', e.target.value)} /></div>
+                  <div className="currencyInput"><span>$</span><input aria-label="Amount" type="number" step="0.01" placeholder="Amount" value={item.amount} onChange={(e) => updateLineItem(index, 'amount', e.target.value)} /></div>
                   <button type="button" className="smallBtn dangerSmall" onClick={() => removeLineItem(index)}>Remove</button>
                 </div>
               ))}

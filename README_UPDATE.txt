@@ -10,3 +10,8 @@ Latest update:
 - Added visible field labels/headers to the Repair Order create/edit modal.
 - Added column headers above Invoice Line Items: Item, Description, Qty, Rate, Amount, Action.
 - Kept modal responsive so fields do not run off the screen.
+
+Shop settings update:
+- Run supabase-shop-settings.sql in Supabase SQL Editor.
+- Default shop labor rate is $175.00.
+- New Labor line items auto-fill the rate but can still be manually overridden per repair order.
