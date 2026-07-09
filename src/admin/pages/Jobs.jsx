@@ -52,6 +52,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const [isSavingJob, setIsSavingJob] = useState(false)
+  const [selectedPdfJob, setSelectedPdfJob] = useState(null)
 
   useEffect(() => {
     loadData()
@@ -469,7 +470,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
     return String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]))
   }
 
-  function printJob(job) {
+  function buildInvoiceHtml(job, autoPrint = false) {
     const customer = customers.find((c) => c.id === job.customer_id)
     const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
     const items = invoiceItemsByJob[job.id] || []
@@ -492,7 +493,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
       `
     }).join('')
 
-    const html = `
+    return `
       <!doctype html>
       <html>
         <head>
@@ -501,7 +502,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
             @page{size:letter;margin:0.33in 0.38in}
             *{box-sizing:border-box}
             body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;margin:0;padding:0;font-size:12px}
-            .invoice{width:7.75in;min-height:10.25in;margin:0 auto;padding:0.08in 0}
+            .invoice{width:7.75in;min-height:10.25in;margin:0 auto;padding:0.08in 0;background:#fff}
             .top{display:grid;grid-template-columns:1fr 2.45in;align-items:start;margin-bottom:0.12in}
             .shop{font-size:17px;font-weight:700;line-height:1.13;padding-left:0.42in;padding-top:0.18in}
             .shop div:not(:first-child){font-weight:500}
@@ -571,13 +572,15 @@ export default function Jobs({ openJobId, onJobOpened }) {
               </div>
             </div>
           </div>
-          <script>window.onload = () => window.print()</script>
+          ${autoPrint ? '<script>window.onload = () => window.print()</script>' : ''}
         </body>
       </html>
     `
+  }
 
+  function printJob(job) {
     const printWindow = window.open('', '_blank')
-    printWindow.document.write(html)
+    printWindow.document.write(buildInvoiceHtml(job, true))
     printWindow.document.close()
   }
 
@@ -670,6 +673,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
                       <td>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</td>
                       <td className="actionCell">
                         <button className="smallBtn" onClick={() => openJobForm(job)}>Edit</button>
+                        <button className="smallBtn viewPdfSmall" onClick={() => setSelectedPdfJob(job)}>View PDF</button>
                         <button className="smallBtn printSmall" onClick={() => printJob(job)}>Print PDF</button>
                         <button className="smallBtn dangerSmall" onClick={() => deleteJob(job.id)}>Delete</button>
                       </td>
@@ -681,6 +685,23 @@ export default function Jobs({ openJobId, onJobOpened }) {
           </table>
         </div>
       </section>
+
+      {selectedPdfJob && (
+        <div className="modalOverlay">
+          <div className="modalCard pdfPreviewModal">
+            <button className="modalClose" onClick={() => setSelectedPdfJob(null)}>×</button>
+            <div className="pdfPreviewHeader">
+              <h2>Invoice Preview</h2>
+              <button className="btn primary" onClick={() => printJob(selectedPdfJob)}>Print PDF</button>
+            </div>
+            <iframe
+              className="pdfPreviewFrame"
+              title="Invoice Preview"
+              srcDoc={buildInvoiceHtml(selectedPdfJob, false)}
+            />
+          </div>
+        </div>
+      )}
 
       {showVehicleForm && (
         <div className="modalOverlay">

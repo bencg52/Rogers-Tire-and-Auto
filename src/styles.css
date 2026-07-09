@@ -2023,3 +2023,89 @@ background:#f8f8f8;
     justify-content: flex-start;
   }
 }
+
+/* PDF preview + inline status updates */
+.actionCell{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+
+.viewPdfSmall{
+  background:#eef2ff !important;
+  border-color:#c7d2fe !important;
+  color:#1e3a8a !important;
+}
+
+.inlineStatus{
+  width:100%;
+  min-width:150px;
+  max-width:190px;
+  border:1px solid #cbd5e1;
+  border-radius:999px;
+  padding:9px 36px 9px 14px;
+  font-weight:800;
+  cursor:pointer;
+  background:#fff;
+}
+
+.inlineStatus.open{background:#dcfce7;color:#14532d;border-color:#bbf7d0}
+.inlineStatus.estimate{background:#fef9c3;color:#854d0e;border-color:#fde68a}
+.inlineStatus.approved{background:#dbeafe;color:#1e3a8a;border-color:#bfdbfe}
+.inlineStatus.in-progress{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe}
+.inlineStatus.waiting-on-parts{background:#ffedd5;color:#9a3412;border-color:#fed7aa}
+.inlineStatus.completed{background:#e9d5ff;color:#581c87;border-color:#ddd6fe}
+.inlineStatus.picked-up{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+.inlineStatus.cancelled{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+
+.pdfPreviewModal{
+  width:min(980px, calc(100vw - 24px)) !important;
+  max-width:min(980px, calc(100vw - 24px)) !important;
+  height:calc(100vh - 48px) !important;
+  max-height:calc(100vh - 48px) !important;
+  overflow:hidden !important;
+  display:flex;
+  flex-direction:column;
+}
+
+.pdfPreviewHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding-right:48px;
+  margin-bottom:12px;
+}
+
+.pdfPreviewHeader h2{
+  margin:0;
+}
+
+.pdfPreviewFrame{
+  width:100%;
+  flex:1;
+  min-height:620px;
+  border:1px solid #dbe3ef;
+  border-radius:14px;
+  background:#fff;
+}
+
+@media(max-width:800px){
+  .actionCell{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .actionCell .smallBtn,
+  .inlineStatus{
+    width:100%;
+    max-width:none;
+  }
+
+  .pdfPreviewHeader{
+    flex-direction:column;
+    align-items:flex-start;
+    padding-right:42px;
+  }
+}
