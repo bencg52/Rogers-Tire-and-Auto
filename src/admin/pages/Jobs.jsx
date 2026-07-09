@@ -31,13 +31,17 @@ const emptyJob = {
   laborTotal: '',
   tax: '',
   total: '',
-  status: 'Open'
+  status: 'Open',
+  lineItems: [
+    { item: '1', description: '', qty: '1', rate: '', amount: '' }
+  ]
 }
 
 export default function Jobs({ openJobId, onJobOpened }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
+  const [invoiceItemsByJob, setInvoiceItemsByJob] = useState({})
   const [search, setSearch] = useState('')
   const [showJobForm, setShowJobForm] = useState(false)
   const [showVehicleForm, setShowVehicleForm] = useState(false)
@@ -82,18 +86,59 @@ export default function Jobs({ openJobId, onJobOpened }) {
     return `${v.year || ''} ${v.make || ''} ${v.model || ''}`.trim() || 'Vehicle'
   }
 
-  function calculateTotal(formData = jobForm) {
-    return (
-      Number(formData.partsTotal || 0) +
-      Number(formData.laborTotal || 0) +
-      Number(formData.tax || 0)
-    ).toFixed(2)
+  function calculateSubtotal(items = jobForm.lineItems || []) {
+    return items.reduce((sum, item) => sum + Number(item.amount || 0), 0)
   }
 
-  function updateCharge(field, value) {
-    const next = { ...jobForm, [field]: value }
-    next.total = calculateTotal(next)
-    setJobForm(next)
+  function calculateTax(items = jobForm.lineItems || []) {
+    return (calculateSubtotal(items) * 0.06).toFixed(2)
+  }
+
+  function calculateTotalFromItems(items = jobForm.lineItems || []) {
+    return (calculateSubtotal(items) + Number(calculateTax(items))).toFixed(2)
+  }
+
+  function updateLineItem(index, field, value) {
+    const nextItems = (jobForm.lineItems || []).map((item, itemIndex) => {
+      if (itemIndex !== index) return item
+
+      const nextItem = { ...item, [field]: value }
+      if (field === 'qty' || field === 'rate') {
+        nextItem.amount = (Number(nextItem.qty || 0) * Number(nextItem.rate || 0)).toFixed(2)
+      }
+      return nextItem
+    })
+
+    setJobForm({
+      ...jobForm,
+      lineItems: nextItems,
+      partsTotal: calculateSubtotal(nextItems).toFixed(2),
+      laborTotal: '0.00',
+      tax: calculateTax(nextItems),
+      total: calculateTotalFromItems(nextItems)
+    })
+  }
+
+  function addLineItem() {
+    setJobForm({
+      ...jobForm,
+      lineItems: [
+        ...(jobForm.lineItems || []),
+        { item: String((jobForm.lineItems || []).length + 1), description: '', qty: '1', rate: '', amount: '' }
+      ]
+    })
+  }
+
+  function removeLineItem(index) {
+    const nextItems = (jobForm.lineItems || []).filter((_, itemIndex) => itemIndex !== index)
+    setJobForm({
+      ...jobForm,
+      lineItems: nextItems.length ? nextItems : [{ item: '1', description: '', qty: '1', rate: '', amount: '' }],
+      partsTotal: calculateSubtotal(nextItems).toFixed(2),
+      laborTotal: '0.00',
+      tax: calculateTax(nextItems),
+      total: calculateTotalFromItems(nextItems)
+    })
   }
 
   async function loadData() {
@@ -133,9 +178,29 @@ export default function Jobs({ openJobId, onJobOpened }) {
       return
     }
 
+    const jobIds = (jobData || []).map((job) => job.id)
+    let itemsByJob = {}
+
+    if (jobIds.length) {
+      const { data: itemData, error: itemError } = await supabase
+        .from('admin_invoice_items')
+        .select('*')
+        .in('repair_order_id', jobIds)
+        .order('line_number', { ascending: true })
+
+      if (!itemError) {
+        itemsByJob = (itemData || []).reduce((acc, item) => {
+          acc[item.repair_order_id] = acc[item.repair_order_id] || []
+          acc[item.repair_order_id].push(item)
+          return acc
+        }, {})
+      }
+    }
+
     setCustomers(customerData || [])
     setVehicles(vehicleData || [])
     setJobs(jobData || [])
+    setInvoiceItemsByJob(itemsByJob)
   }
 
   function openVehicleForm(vehicle = null) {
@@ -222,7 +287,18 @@ export default function Jobs({ openJobId, onJobOpened }) {
         laborTotal: job.labor_total || '',
         tax: job.tax || '',
         total: job.total || '',
-        status: job.status || 'Open'
+        status: job.status || 'Open',
+        lineItems: (invoiceItemsByJob[job.id] || []).length
+          ? invoiceItemsByJob[job.id].map((item, index) => ({
+              item: item.item_code || String(index + 1),
+              description: item.description || '',
+              qty: item.qty || '1',
+              rate: item.rate || '',
+              amount: item.amount || ''
+            }))
+          : [
+              { item: '1', description: job.repairs_performed || job.customer_complaint || '', qty: '1', rate: job.total || '', amount: job.total || '' }
+            ]
       })
     } else {
       setEditingJob(null)
@@ -274,12 +350,14 @@ export default function Jobs({ openJobId, onJobOpened }) {
       customer_complaint: jobForm.complaint,
       diagnosis: jobForm.diagnosis,
       repairs_performed: jobForm.repairs,
-      parts_total: Number(jobForm.partsTotal || 0),
-      labor_total: Number(jobForm.laborTotal || 0),
-      tax: Number(jobForm.tax || 0),
-      total: Number(jobForm.total || calculateTotal()),
+      parts_total: Number(calculateSubtotal(jobForm.lineItems).toFixed(2)),
+      labor_total: 0,
+      tax: Number(calculateTax(jobForm.lineItems)),
+      total: Number(calculateTotalFromItems(jobForm.lineItems)),
       status: jobForm.status
     }
+
+    let savedJobId = editingJob?.id
 
     if (editingJob) {
       const { error } = await supabase
@@ -295,16 +373,43 @@ export default function Jobs({ openJobId, onJobOpened }) {
       showSuccess('Job updated')
     } else {
       const roNumber = await generateNextRoNumber()
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('admin_repair_orders')
         .insert({ ...payload, ro_number: roNumber })
+        .select('id')
+        .single()
 
       if (error) {
         setErrorMsg(error.message)
         return
       }
 
+      savedJobId = data.id
       showSuccess('Job created')
+    }
+
+    if (savedJobId) {
+      await supabase.from('admin_invoice_items').delete().eq('repair_order_id', savedJobId)
+
+      const itemPayload = (jobForm.lineItems || [])
+        .filter((item) => item.description || item.amount || item.rate)
+        .map((item, index) => ({
+          repair_order_id: savedJobId,
+          line_number: index + 1,
+          item_code: item.item || String(index + 1),
+          description: item.description || '',
+          qty: Number(item.qty || 0),
+          rate: Number(item.rate || 0),
+          amount: Number(item.amount || 0)
+        }))
+
+      if (itemPayload.length) {
+        const { error: itemError } = await supabase.from('admin_invoice_items').insert(itemPayload)
+        if (itemError) {
+          setErrorMsg(itemError.message)
+          return
+        }
+      }
     }
 
     setShowJobForm(false)
@@ -344,121 +449,110 @@ export default function Jobs({ openJobId, onJobOpened }) {
     showSuccess('Job deleted')
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]))
+  }
+
   function printJob(job) {
     const customer = customers.find((c) => c.id === job.customer_id)
     const vehicle = vehicles.find((v) => v.id === job.vehicle_id)
-    const isPickedUp = job.status === 'Picked Up'
+    const items = invoiceItemsByJob[job.id] || []
+    const invoiceNumber = String(job.ro_number || '').replace('RO-', '') || '17919'
+    const invoiceDate = job.opened_at ? new Date(job.opened_at).toLocaleDateString() : new Date().toLocaleDateString()
+    const subtotal = items.length ? items.reduce((sum, item) => sum + Number(item.amount || 0), 0) : Number(job.parts_total || 0) + Number(job.labor_total || 0)
+    const tax = Number(job.tax || (subtotal * 0.06))
+    const total = Number(job.total || subtotal + tax)
+
+    const itemRows = Array.from({ length: 12 }).map((_, index) => {
+      const item = items[index]
+      return `
+        <tr>
+          <td>${escapeHtml(item?.item_code || '')}</td>
+          <td>${escapeHtml(item?.description || '')}</td>
+          <td>${item ? escapeHtml(item.qty) : ''}</td>
+          <td>${item ? '$' + money(item.rate) : ''}</td>
+          <td>${item ? '$' + money(item.amount) : ''}</td>
+        </tr>
+      `
+    }).join('')
 
     const html = `
       <!doctype html>
       <html>
         <head>
-          <title>${job.ro_number || 'Repair Order'}</title>
+          <title>Invoice ${escapeHtml(invoiceNumber)}</title>
           <style>
-            body{font-family:Arial,sans-serif;color:#111;margin:0;padding:32px;background:#fff}
-            .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:4px solid #111;padding-bottom:18px;margin-bottom:24px}
-            h1{margin:0;font-size:30px}
-            p{margin:6px 0}
-            .stamp{border:3px solid ${isPickedUp ? '#16a34a' : '#ef3b3b'};color:${isPickedUp ? '#16a34a' : '#ef3b3b'};padding:10px 18px;font-weight:900;font-size:22px;transform:rotate(-3deg)}
-            .meta{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px}
-            .box{border:1px solid #d1d5db;border-radius:10px;padding:16px}
-            .box h2{font-size:15px;text-transform:uppercase;margin:0 0 10px}
-            .section{margin:18px 0}
-            .section h2{font-size:16px;text-transform:uppercase;border-bottom:1px solid #d1d5db;padding-bottom:8px}
-            .notes{white-space:pre-wrap;line-height:1.5}
-            table{width:100%;border-collapse:collapse;margin-top:10px}
-            th,td{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}
-            th{background:#f3f4f6;text-transform:uppercase;font-size:12px}
-            .totals{margin-left:auto;width:320px;margin-top:20px}
-            .totals div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #e5e7eb}
-            .grand{font-size:22px;font-weight:900}
-            .sig{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:44px}
-            .line{border-top:1px solid #111;padding-top:8px}
-            @media print{body{padding:20px}}
+            @page{size:letter;margin:0.35in}
+            *{box-sizing:border-box}
+            body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;margin:0;padding:0;font-size:13px}
+            .invoice{width:7.8in;min-height:10.2in;margin:0 auto;padding:0.15in 0.1in}
+            .top{display:grid;grid-template-columns:1fr 2.55in;align-items:start;margin-bottom:0.28in}
+            .shop{font-size:18px;font-weight:700;line-height:1.25;padding-left:0.25in;padding-top:0.2in}
+            .shop div:not(:first-child){font-weight:500}
+            .invoiceTitle{text-align:center;font-size:31px;font-weight:900;margin-bottom:0.08in}
+            .dateBox{width:2.25in;margin-left:auto;border-collapse:collapse;font-size:12px;text-align:center}
+            .dateBox th,.dateBox td{border:1px solid #111;padding:7px 8px}
+            .billTo{width:3.6in;height:1.05in;border:1px solid #111;margin-left:0.1in;margin-bottom:1.25in}
+            .billToHeader{text-align:center;border-bottom:1px solid #111;font-weight:700;font-size:11px;padding:3px;background:#eee}
+            .billToBody{padding:8px 10px;line-height:1.3;font-size:13px}
+            .items{width:100%;border-collapse:collapse;table-layout:fixed}
+            .items th{border:1px solid #111;background:#ddd;font-size:11px;padding:4px;text-align:center}
+            .items td{border-left:1px solid #111;border-right:1px solid #111;height:0.33in;padding:5px 7px;vertical-align:top}
+            .items tr:last-child td{border-bottom:1px solid #111}
+            .items .item{width:1.05in}.items .desc{width:3.6in}.items .qty{width:0.8in}.items .rate{width:1.0in}.items .amount{width:1.15in}
+            .bottom{display:grid;grid-template-columns:1fr 3.0in;margin-top:0;border-left:1px solid #111;border-bottom:1px solid #111;border-right:1px solid #111;min-height:1.05in}
+            .notes{border-right:1px solid #111;padding:10px;white-space:pre-wrap;font-size:12px}
+            .totals{display:grid;grid-template-rows:0.3in 0.3in 0.45in}
+            .totals div{border-bottom:1px solid #111;padding:7px 9px;font-weight:700}
+            .totals div:last-child{border-bottom:0;background:#ddd;font-size:28px;font-weight:900;display:flex;justify-content:space-between;align-items:center}
+            .totals span{float:right}
+            @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.invoice{margin:0}}
           </style>
         </head>
         <body>
-          <div class="header">
-            <div>
-              <h1>ROGER'S TIRE -N- AUTO</h1>
-              <p>Repair Order / Invoice</p>
-              <p>${new Date().toLocaleDateString()}</p>
-            </div>
-            <div class="stamp">${isPickedUp ? 'PAID / PICKED UP' : 'COMPLETED'}</div>
-          </div>
-
-          <div class="meta">
-            <div class="box">
-              <h2>Repair Order</h2>
-              <p><strong>RO #:</strong> ${job.ro_number || '-'}</p>
-              <p><strong>Status:</strong> ${job.status || '-'}</p>
-              <p><strong>Technician:</strong> ${job.technician || '-'}</p>
-              <p><strong>Opened:</strong> ${job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</p>
-            </div>
-
-            <div class="box">
-              <h2>Customer</h2>
-              <p><strong>Name:</strong> ${customerName(customer)}</p>
-              <p><strong>Phone:</strong> ${customer?.phone || '-'}</p>
-              <p><strong>Email:</strong> ${customer?.email || '-'}</p>
-              <p><strong>Address:</strong> ${customer?.address || '-'}</p>
+          <div class="invoice">
+            <div class="top">
+              <div class="shop">
+                <div>Roger's Tire-N-Auto and Upstate Exhaust</div>
+                <div>7774 Augusta Road</div>
+                <div>Piedmont, S.C. 29673</div>
+                <div>864-277-7800</div>
+              </div>
+              <div>
+                <div class="invoiceTitle">Invoice</div>
+                <table class="dateBox">
+                  <tr><th>DATE</th><th>INVOICE #</th></tr>
+                  <tr><td>${escapeHtml(invoiceDate)}</td><td>${escapeHtml(invoiceNumber)}</td></tr>
+                </table>
+              </div>
             </div>
 
-            <div class="box">
-              <h2>Vehicle</h2>
-              <p><strong>Vehicle:</strong> ${vehicleName(vehicle)}</p>
-              <p><strong>VIN:</strong> ${vehicle?.vin || '-'}</p>
-              <p><strong>Plate:</strong> ${vehicle?.license_plate || '-'}</p>
-              <p><strong>Mileage In:</strong> ${job.mileage_in || '-'}</p>
+            <div class="billTo">
+              <div class="billToHeader">BILL TO</div>
+              <div class="billToBody">
+                <strong>${escapeHtml(customerName(customer))}</strong><br />
+                ${escapeHtml(customer?.phone || '')}<br />
+                ${escapeHtml(customer?.address || '')}<br />
+                ${escapeHtml(vehicleName(vehicle))}${vehicle?.license_plate ? ' / Plate: ' + escapeHtml(vehicle.license_plate) : ''}
+              </div>
             </div>
 
-            <div class="box">
-              <h2>Charges</h2>
-              <p><strong>Parts:</strong> $${money(job.parts_total)}</p>
-              <p><strong>Labor:</strong> $${money(job.labor_total)}</p>
-              <p><strong>Tax:</strong> $${money(job.tax)}</p>
-              <p><strong>Total:</strong> $${money(job.total)}</p>
-            </div>
-          </div>
-
-          <div class="section">
-            <h2>Customer Complaint</h2>
-            <div class="notes">${job.customer_complaint || '-'}</div>
-          </div>
-
-          <div class="section">
-            <h2>Diagnosis</h2>
-            <div class="notes">${job.diagnosis || '-'}</div>
-          </div>
-
-          <div class="section">
-            <h2>Repairs Performed</h2>
-            <div class="notes">${job.repairs_performed || '-'}</div>
-          </div>
-
-          <div class="section">
-            <h2>Charges</h2>
-            <table>
-              <tbody>
-                <tr><td>Parts</td><td>$${money(job.parts_total)}</td></tr>
-                <tr><td>Labor</td><td>$${money(job.labor_total)}</td></tr>
-                <tr><td>Tax</td><td>$${money(job.tax)}</td></tr>
-              </tbody>
+            <table class="items">
+              <thead>
+                <tr><th class="item">ITEM</th><th class="desc">DESCRIPTION</th><th class="qty">QTY</th><th class="rate">RATE</th><th class="amount">AMOUNT</th></tr>
+              </thead>
+              <tbody>${itemRows}</tbody>
             </table>
 
-            <div class="totals">
-              <div><span>Parts</span><strong>$${money(job.parts_total)}</strong></div>
-              <div><span>Labor</span><strong>$${money(job.labor_total)}</strong></div>
-              <div><span>Tax</span><strong>$${money(job.tax)}</strong></div>
-              <div class="grand"><span>Total</span><strong>$${money(job.total)}</strong></div>
+            <div class="bottom">
+              <div class="notes">${escapeHtml(job.customer_complaint || '')}</div>
+              <div class="totals">
+                <div>Subtotal <span>$${money(subtotal)}</span></div>
+                <div>6% Tax <span>$${money(tax)}</span></div>
+                <div>Total <span>$${money(total)}</span></div>
+              </div>
             </div>
           </div>
-
-          <div class="sig">
-            <div class="line">Customer Signature</div>
-            <div class="line">Date</div>
-          </div>
-
           <script>window.onload = () => window.print()</script>
         </body>
       </html>
@@ -648,13 +742,27 @@ export default function Jobs({ openJobId, onJobOpened }) {
             <textarea placeholder="Diagnosis" value={jobForm.diagnosis} onChange={(e) => setJobForm({ ...jobForm, diagnosis: e.target.value })} />
             <textarea placeholder="Repairs Performed" value={jobForm.repairs} onChange={(e) => setJobForm({ ...jobForm, repairs: e.target.value })} />
 
-            <h3 className="chargeHeading">Charges</h3>
+            <h3 className="chargeHeading">Invoice Line Items</h3>
 
-            <div className="modalGrid">
-              <input type="number" step="0.01" placeholder="Parts Total" value={jobForm.partsTotal} onChange={(e) => updateCharge('partsTotal', e.target.value)} />
-              <input type="number" step="0.01" placeholder="Labor Total" value={jobForm.laborTotal} onChange={(e) => updateCharge('laborTotal', e.target.value)} />
-              <input type="number" step="0.01" placeholder="Tax" value={jobForm.tax} onChange={(e) => updateCharge('tax', e.target.value)} />
-              <input type="number" step="0.01" placeholder="Grand Total" value={jobForm.total} onChange={(e) => setJobForm({ ...jobForm, total: e.target.value })} />
+            <div className="lineItemsEditor">
+              {(jobForm.lineItems || []).map((item, index) => (
+                <div className="lineItemRow" key={index}>
+                  <input placeholder="Item" value={item.item} onChange={(e) => updateLineItem(index, 'item', e.target.value)} />
+                  <input className="lineDesc" placeholder="Description" value={item.description} onChange={(e) => updateLineItem(index, 'description', e.target.value)} />
+                  <input type="number" step="0.01" placeholder="Qty" value={item.qty} onChange={(e) => updateLineItem(index, 'qty', e.target.value)} />
+                  <input type="number" step="0.01" placeholder="Rate" value={item.rate} onChange={(e) => updateLineItem(index, 'rate', e.target.value)} />
+                  <input type="number" step="0.01" placeholder="Amount" value={item.amount} onChange={(e) => updateLineItem(index, 'amount', e.target.value)} />
+                  <button type="button" className="smallBtn dangerSmall" onClick={() => removeLineItem(index)}>Remove</button>
+                </div>
+              ))}
+
+              <button type="button" className="smallBtn" onClick={addLineItem}>+ Add Line Item</button>
+            </div>
+
+            <div className="invoiceTotalsPreview">
+              <strong>Subtotal:</strong> ${calculateSubtotal(jobForm.lineItems).toFixed(2)} &nbsp;|&nbsp;
+              <strong>6% Tax:</strong> ${calculateTax(jobForm.lineItems)} &nbsp;|&nbsp;
+              <strong>Total:</strong> ${calculateTotalFromItems(jobForm.lineItems)}
             </div>
 
             {(jobForm.status === 'Completed' || jobForm.status === 'Picked Up') && (
