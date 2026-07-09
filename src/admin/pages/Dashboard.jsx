@@ -41,7 +41,6 @@ export default function Dashboard({ onOpenJob }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
-  const [appointments, setAppointments] = useState([])
   const [errorMsg, setErrorMsg] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -83,14 +82,9 @@ export default function Dashboard({ onOpenJob }) {
       return
     }
 
-    const { data: appointmentData } = await supabase
-      .from('appointment_requests')
-      .select('id, preferred_date, created_at')
-
     setCustomers(customerData || [])
     setVehicles(vehicleData || [])
     setJobs(jobData || [])
-    setAppointments(appointmentData || [])
     setLoading(false)
   }
 
@@ -111,8 +105,6 @@ export default function Dashboard({ onOpenJob }) {
   }
 
   const metrics = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10)
-
     const openJobs = jobs.filter((job) => activeStatuses.includes(job.status || 'Open'))
     const completedJobs = jobs.filter((job) => finishedStatuses.includes(job.status || ''))
     const pickedUpJobs = jobs.filter((job) => job.status === 'Picked Up')
@@ -121,11 +113,6 @@ export default function Dashboard({ onOpenJob }) {
     const vehiclesInShop = vehicles.filter((vehicle) => {
       const status = vehicle.status || ''
       return status === 'In Shop' || status === 'Active'
-    })
-
-    const todayAppointments = appointments.filter((appt) => {
-      const date = appt.preferred_date || appt.created_at
-      return date && String(date).slice(0, 10) === today
     })
 
     const revenue = jobs.reduce((sum, job) => sum + Number(job.total || 0), 0)
@@ -142,13 +129,12 @@ export default function Dashboard({ onOpenJob }) {
       pickedUpJobs,
       walkInJobs,
       vehiclesInShop,
-      todayAppointments,
       revenue,
       collected,
       pendingRevenue,
       totalWork
     }
-  }, [appointments, jobs, vehicles])
+  }, [jobs, vehicles])
 
   const recentJobs = [...jobs]
     .sort((a, b) => new Date(b.opened_at || 0) - new Date(a.opened_at || 0))
@@ -251,10 +237,6 @@ export default function Dashboard({ onOpenJob }) {
                   <strong>{money(metrics.pendingRevenue)}</strong>
                 </div>
 
-                <div>
-                  <span>Today's Appointments</span>
-                  <strong>{number(metrics.todayAppointments.length)}</strong>
-                </div>
               </div>
             </section>
 

@@ -23,7 +23,6 @@ export default function Header() {
         <a href="#services">Services</a>
         <a href="#tires">Tires</a>
         <a href="#about">About</a>
-        <a href="#appointment">Appointments</a>
         <a href="#contact">Contact</a>
         <a href="/admin" className="adminHeaderLink">Admin</a>
       </nav>

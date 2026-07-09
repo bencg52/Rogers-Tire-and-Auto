@@ -29,7 +29,7 @@ export default function Reviews() {
           <div className="stars">★★★★★</div>
           <p>
             “I had a tire with a screw in it and Steven patched it for me. I
-            didn’t have an appointment and was in a hurry. Great job. Support
+            was in a hurry. Great job. Support
             this family business!”
           </p>
           <strong>— Sue Crance</strong>

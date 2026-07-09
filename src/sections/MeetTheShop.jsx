@@ -1,3 +1,4 @@
+import { Phone } from 'lucide-react'
 import { BUSINESS } from '../config/business'
 
 export default function MeetTheShop() {
@@ -24,8 +25,9 @@ export default function MeetTheShop() {
           <li>Trusted local reputation</li>
         </ul>
 
-        <a className="btn primary" href="#appointment">
-          Schedule Service
+        <a className="btn primary" href={`tel:${BUSINESS.phoneLink}`}>
+          <Phone size={18} />
+          Call Now
         </a>
       </div>
     </section>

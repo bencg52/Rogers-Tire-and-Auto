@@ -1,4 +1,4 @@
-import { Phone, CalendarDays, Star } from 'lucide-react'
+import { Phone, Star, Wrench } from 'lucide-react'
 import { BUSINESS } from '../config/business'
 
 export default function Hero() {
@@ -25,9 +25,9 @@ export default function Hero() {
           </p>
 
           <div className="heroButtons">
-            <a href="#appointment" className="btn primary">
-              <CalendarDays size={18} />
-              Schedule Service
+            <a href="#services" className="btn primary">
+              <Wrench size={18} />
+              View Services
             </a>
 
             <a

@@ -51,17 +51,6 @@ function ServiceIcon({ category, name }) {
 function PublicSite() {
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({
-    full_name: '',
-    phone: '',
-    email: '',
-    vehicle_info: '',
-    requested_service: '',
-    preferred_date: '',
-    notes: ''
-  })
-  const [message, setMessage] = useState('')
-
   const phoneNumber = BUSINESS.phone || ''
   const callLink = phoneNumber ? `tel:${phoneNumber}` : '#'
 
@@ -85,39 +74,6 @@ function PublicSite() {
 
     loadServices()
   }, [])
-
-  async function submitAppointment(e) {
-    e.preventDefault()
-    setMessage('')
-
-    if (!form.full_name || !form.phone) {
-      setMessage('Please enter your name and phone number.')
-      return
-    }
-
-    if (!supabaseReady) {
-      setMessage('Supabase is not connected yet. Check Netlify environment variables.')
-      return
-    }
-
-    const payload = { ...form, preferred_date: form.preferred_date || null }
-    const { error } = await supabase.from('appointment_requests').insert(payload)
-
-    if (error) {
-      setMessage('Could not submit appointment request: ' + error.message)
-    } else {
-      setMessage("Appointment request submitted. Roger's Tire -N- Auto will follow up.")
-      setForm({
-        full_name: '',
-        phone: '',
-        email: '',
-        vehicle_info: '',
-        requested_service: '',
-        preferred_date: '',
-        notes: ''
-      })
-    }
-  }
 
   return (
     <>
@@ -161,31 +117,6 @@ function PublicSite() {
       <MeetTheShop />
       <Gallery />
 
-      <section id="appointment" className="section">
-        <p className="eyebrow center">Book Appointment</p>
-        <h2>Request Service</h2>
-
-        <form className="form" onSubmit={submitAppointment}>
-          <input placeholder="Full Name *" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-          <input placeholder="Phone *" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <input placeholder="Vehicle info" value={form.vehicle_info} onChange={(e) => setForm({ ...form, vehicle_info: e.target.value })} />
-
-          <select value={form.requested_service} onChange={(e) => setForm({ ...form, requested_service: e.target.value })}>
-            <option value="">Select service</option>
-            {services.map((s) => (
-              <option key={s.id || s.service_name}>{s.service_name}</option>
-            ))}
-          </select>
-
-          <input type="date" value={form.preferred_date} onChange={(e) => setForm({ ...form, preferred_date: e.target.value })} />
-          <textarea placeholder="What seems to be the issue?" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-
-          <button className="btn primary">Submit Request</button>
-          {message && <p className="message">{message}</p>}
-        </form>
-      </section>
-
       <section className="section why">
         <p className="eyebrow center">Why Choose Us</p>
         <h2>Auto Repair You Can Actually Trust</h2>
@@ -218,7 +149,7 @@ function PublicSite() {
           <p className="eyebrow">Need Your Car Fixed?</p>
           <h2>Call Roger's Tire -N- Auto Today</h2>
           <p className="contactText">
-            Questions, repairs, tires, inspections, or appointments — give us a call and we’ll help you get pointed in the right direction.
+            Questions, repairs, tires, or inspections — give us a call and we’ll help you get pointed in the right direction.
           </p>
 
           <div className="contactButtons">
