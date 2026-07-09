@@ -37,7 +37,7 @@ const emptyJob = {
   ]
 }
 
-export default function Jobs({ openJobId, onJobOpened }) {
+export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
@@ -57,6 +57,10 @@ export default function Jobs({ openJobId, onJobOpened }) {
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    setSearch(initialSearch || '')
+  }, [initialSearch])
 
   useEffect(() => {
     if (!openJobId || !jobs.length) return

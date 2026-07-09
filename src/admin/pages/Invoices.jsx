@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
-export default function Invoices({ onOpenJob }) {
+export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initialSearch = '' }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
@@ -15,6 +15,11 @@ export default function Invoices({ onOpenJob }) {
   useEffect(() => {
     loadInvoices()
   }, [])
+
+  useEffect(() => {
+    setStatusFilter(initialStatusFilter || 'All')
+    setSearch(initialSearch || '')
+  }, [initialStatusFilter, initialSearch])
 
   function money(value) {
     return Number(value || 0).toFixed(2)

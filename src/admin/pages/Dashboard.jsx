@@ -16,11 +16,11 @@ function number(value) {
   return Number(value || 0).toLocaleString()
 }
 
-function DashboardGauge({ title, value, max, label, tone = 'red' }) {
+function DashboardGauge({ title, value, max, label, tone = 'red', onClick }) {
   const pct = Math.min(100, Math.round((Number(value || 0) / Math.max(Number(max || 1), 1)) * 100))
 
   return (
-    <div className="dashboardGaugeCard">
+    <button type="button" className="dashboardGaugeCard dashboardClickable" onClick={onClick}>
       <div
         className={`dashboardGauge ${tone}`}
         style={{ '--gauge-value': `${pct}%` }}
@@ -33,11 +33,11 @@ function DashboardGauge({ title, value, max, label, tone = 'red' }) {
 
       <h3>{title}</h3>
       <p>{pct}% of current tracked workload</p>
-    </div>
+    </button>
   )
 }
 
-export default function Dashboard({ onOpenJob }) {
+export default function Dashboard({ onOpenJob, onOpenJobs, onOpenCustomers, onOpenInvoices }) {
   const [customers, setCustomers] = useState([])
   const [vehicles, setVehicles] = useState([])
   const [jobs, setJobs] = useState([])
@@ -163,29 +163,29 @@ export default function Dashboard({ onOpenJob }) {
       ) : (
         <>
           <div className="dashboardKpiGrid">
-            <div className="dashboardKpi">
+            <button type="button" className="dashboardKpi dashboardClickable" onClick={() => onOpenJobs?.('Open')}>
               <span>Open Jobs</span>
               <strong>{number(metrics.openJobs.length)}</strong>
               <p>Active repair orders</p>
-            </div>
+            </button>
 
-            <div className="dashboardKpi">
+            <button type="button" className="dashboardKpi dashboardClickable" onClick={() => onOpenJobs?.('')}>
               <span>Vehicles Tracked</span>
               <strong>{number(vehicles.length)}</strong>
-              <p>Customer and walk-in vehicles</p>
-            </div>
+              <p>View repair orders with vehicle details</p>
+            </button>
 
-            <div className="dashboardKpi">
+            <button type="button" className="dashboardKpi dashboardClickable" onClick={() => onOpenCustomers?.()}>
               <span>Customers</span>
               <strong>{number(customers.length)}</strong>
               <p>Total customer records</p>
-            </div>
+            </button>
 
-            <div className="dashboardKpi">
+            <button type="button" className="dashboardKpi dashboardClickable" onClick={() => onOpenInvoices?.('All', '')}>
               <span>Total RO Value</span>
               <strong>{money(metrics.revenue)}</strong>
-              <p>All repair orders</p>
-            </div>
+              <p>All saved invoices</p>
+            </button>
           </div>
 
           <div className="dashboardGaugeGrid">
@@ -195,6 +195,7 @@ export default function Dashboard({ onOpenJob }) {
               max={metrics.totalWork}
               label="Open"
               tone="red"
+              onClick={() => onOpenJobs?.('Open')}
             />
 
             <DashboardGauge
@@ -203,6 +204,7 @@ export default function Dashboard({ onOpenJob }) {
               max={metrics.totalWork}
               label="Done"
               tone="green"
+              onClick={() => onOpenJobs?.('Completed')}
             />
 
             <DashboardGauge
@@ -211,6 +213,7 @@ export default function Dashboard({ onOpenJob }) {
               max={metrics.totalWork}
               label="Walk-In"
               tone="yellow"
+              onClick={() => onOpenJobs?.('Walk-In')}
             />
           </div>
 
@@ -222,20 +225,20 @@ export default function Dashboard({ onOpenJob }) {
               </div>
 
               <div className="revenueRows">
-                <div>
+                <button type="button" className="revenueRowButton" onClick={() => onOpenInvoices?.('All', '')}>
                   <span>Total RO Value</span>
                   <strong>{money(metrics.revenue)}</strong>
-                </div>
+                </button>
 
-                <div>
+                <button type="button" className="revenueRowButton" onClick={() => onOpenInvoices?.('Paid', '')}>
                   <span>Picked Up / Collected</span>
                   <strong>{money(metrics.collected)}</strong>
-                </div>
+                </button>
 
-                <div>
+                <button type="button" className="revenueRowButton" onClick={() => onOpenInvoices?.('Open', '')}>
                   <span>Not Picked Up Yet</span>
                   <strong>{money(metrics.pendingRevenue)}</strong>
-                </div>
+                </button>
 
               </div>
             </section>

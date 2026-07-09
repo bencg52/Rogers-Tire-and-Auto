@@ -3,27 +3,44 @@ import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
 import Jobs from './pages/Jobs'
 import Invoices from './pages/Invoices'
-import Reports from './pages/Reports'
 import Settings from './pages/Settings'
 
 export default function AdminLayout() {
   const [page, setPage] = useState('dashboard')
   const [jobToOpen, setJobToOpen] = useState(null)
+  const [jobsInitialSearch, setJobsInitialSearch] = useState('')
+  const [invoicesInitialStatus, setInvoicesInitialStatus] = useState('All')
+  const [invoicesInitialSearch, setInvoicesInitialSearch] = useState('')
+
+  function openJobsPage(search = '') {
+    setJobToOpen(null)
+    setJobsInitialSearch(search)
+    setPage('jobs')
+  }
+
+  function openInvoicesPage(status = 'All', search = '') {
+    setInvoicesInitialStatus(status)
+    setInvoicesInitialSearch(search)
+    setPage('invoices')
+  }
 
   const renderPage = () => {
     switch (page) {
       case 'customers':
         return <Customers onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
       case 'jobs':
-        return <Jobs openJobId={jobToOpen} onJobOpened={() => setJobToOpen(null)} />
+        return <Jobs openJobId={jobToOpen} initialSearch={jobsInitialSearch} onJobOpened={() => setJobToOpen(null)} />
       case 'invoices':
-        return <Invoices onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
-      case 'reports':
-        return <Reports />
+        return <Invoices initialStatusFilter={invoicesInitialStatus} initialSearch={invoicesInitialSearch} onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
       case 'settings':
         return <Settings />
       default:
-        return <Dashboard onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
+        return <Dashboard
+          onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }}
+          onOpenJobs={openJobsPage}
+          onOpenCustomers={() => setPage('customers')}
+          onOpenInvoices={openInvoicesPage}
+        />
     }
   }
 
@@ -39,9 +56,8 @@ export default function AdminLayout() {
 
         <button onClick={() => setPage('dashboard')}>🏠 Dashboard</button>
         <button onClick={() => setPage('customers')}>👥 Customers</button>
-        <button onClick={() => { setJobToOpen(null); setPage('jobs') }}>🔧 Jobs</button>
-        <button onClick={() => setPage('invoices')}>🧾 Invoices</button>
-        <button onClick={() => setPage('reports')}>📊 Reports</button>
+        <button onClick={() => openJobsPage('')}>🔧 Jobs</button>
+        <button onClick={() => openInvoicesPage('All', '')}>🧾 Invoices</button>
         <button onClick={() => setPage('settings')}>⚙️ Settings</button>
 
         <a className="adminSiteLink" href="/">← Return to Website</a>
