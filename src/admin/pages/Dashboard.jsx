@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const activeStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts']
@@ -25,7 +25,7 @@ function DashboardGauge({ title, value, max, label, tone = 'red', onClick }) {
         className={`dashboardGauge ${tone}`}
         style={{ '--gauge-value': `${pct}%` }}
       >
-        <div>
+        <div className="dashboardHeaderText">
           <strong>{number(value)}</strong>
           <span>{label}</span>
         </div>
@@ -143,10 +143,9 @@ export default function Dashboard({ onOpenJob, onOpenJobs, onOpenCustomers, onOp
   return (
     <>
       <div className="dashboardHeader">
-        <div>
-          <p className="profileEyebrow">Roger&apos;s Tire -N- Auto · Admin Portal</p>
+        <div className="dashboardHeaderText">
           <h1>Dashboard</h1>
-          <p>Today’s shop workload, jobs, revenue, and customer activity.</p>
+          <p>Today's shop workload, jobs, revenue, and customer activity.</p>
         </div>
 
         <button className="btn primary" onClick={loadDashboard}>
@@ -220,7 +219,7 @@ export default function Dashboard({ onOpenJob, onOpenJobs, onOpenCustomers, onOp
           <div className="dashboardLowerGrid">
             <section className="profilePanel">
               <div className="panelTitle">
-                <span>💰</span>
+                <span>ðŸ’°</span>
                 <h2>Revenue Snapshot</h2>
               </div>
 
@@ -245,7 +244,7 @@ export default function Dashboard({ onOpenJob, onOpenJobs, onOpenCustomers, onOp
 
             <section className="profilePanel">
               <div className="panelTitle">
-                <span>🔧</span>
+                <span>ðŸ”§</span>
                 <h2>Recent Jobs</h2>
               </div>
 

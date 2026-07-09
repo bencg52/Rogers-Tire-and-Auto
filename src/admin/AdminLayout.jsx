@@ -3,9 +3,8 @@ import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
 import Jobs from './pages/Jobs'
 import Invoices from './pages/Invoices'
-import Settings from './pages/Settings'
 
-export default function AdminLayout({ adminEmail, onSignOut }) {
+export default function AdminLayout({ onSignOut }) {
   const [page, setPage] = useState('dashboard')
   const [jobToOpen, setJobToOpen] = useState(null)
   const [jobsInitialSearch, setJobsInitialSearch] = useState('')
@@ -32,8 +31,6 @@ export default function AdminLayout({ adminEmail, onSignOut }) {
         return <Jobs openJobId={jobToOpen} initialSearch={jobsInitialSearch} onJobOpened={() => setJobToOpen(null)} />
       case 'invoices':
         return <Invoices initialStatusFilter={invoicesInitialStatus} initialSearch={invoicesInitialSearch} onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }} />
-      case 'settings':
-        return <Settings />
       default:
         return <Dashboard
           onOpenJob={(jobId) => { setJobToOpen(jobId); setPage('jobs') }}
@@ -56,12 +53,10 @@ export default function AdminLayout({ adminEmail, onSignOut }) {
         <button onClick={() => setPage('customers')}>Customers</button>
         <button onClick={() => openJobsPage('')}>Jobs</button>
         <button onClick={() => openInvoicesPage('All', '')}>Invoices</button>
-        <button onClick={() => setPage('settings')}>Settings</button>
 
         <a className="adminSiteLink" href="/">Return to Website</a>
 
         <div className="adminSessionBlock">
-          {adminEmail && <span>{adminEmail}</span>}
           <button type="button" className="adminSignOut" onClick={onSignOut}>
             Sign Out
           </button>

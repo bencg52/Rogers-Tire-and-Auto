@@ -2576,3 +2576,41 @@ button.dashboardGaugeCard,
   background:rgba(239,51,56,.22);
   border-color:rgba(239,51,56,.45);
 }
+
+/* Dashboard top spacing cleanup */
+.dashboardHeader{
+  display:flex !important;
+  align-items:flex-start !important;
+  justify-content:space-between !important;
+  gap:24px !important;
+  margin:0 0 30px !important;
+  padding:0 0 24px !important;
+  border-bottom:1px solid rgba(255,255,255,.10) !important;
+}
+
+.dashboardHeaderText{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:0;
+}
+
+.dashboardHeaderText h1{
+  margin:0 !important;
+}
+
+.dashboardHeaderText p{
+  margin:0 !important;
+  color:#cbd5e1 !important;
+  font-size:16px !important;
+  font-weight:800 !important;
+}
+
+.dashboardHeader .btn{
+  flex-shrink:0;
+  margin-top:8px;
+}
+
+.dashboardKpiGrid{
+  margin-top:0 !important;
+}
