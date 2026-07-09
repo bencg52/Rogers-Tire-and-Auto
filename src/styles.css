@@ -2121,10 +2121,14 @@ background:#f8f8f8;
   line-height:1.2;
   cursor:pointer;
   text-align:center;
-  appearance:auto;
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  background-image:none !important;
 }
-.invoiceInlineStatus.draft{background:#ffedd5;color:#9a3412;border-color:#fed7aa}
-.invoiceInlineStatus.open{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+.invoiceInlineStatus::-ms-expand{display:none}
+.invoiceInlineStatus.draft{background:#fef9c3;color:#854d0e;border-color:#fde68a}
+.invoiceInlineStatus.open{background:#dcfce7;color:#14532d;border-color:#bbf7d0}
 .invoiceInlineStatus.paid{background:#dcfce7;color:#166534;border-color:#bbf7d0}
 .invoiceInlineStatus.void{background:#fee2e2;color:#991b1b;border-color:#fecaca}
 .invoiceStatusBadge{

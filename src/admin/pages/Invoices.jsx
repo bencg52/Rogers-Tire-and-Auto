@@ -351,7 +351,7 @@ export default function Invoices({ onOpenJob }) {
                     </td>
                     <td>${money(totals.total)}</td>
                     <td className="actionCell">
-                      <button className="smallBtn" onClick={() => setSelectedInvoice(job)}>View</button>
+                      <button className="smallBtn viewPdfSmall" onClick={() => setSelectedInvoice(job)}>View</button>
                       <button className="smallBtn printSmall" onClick={() => printInvoice(job)}>Print PDF</button>
                       <button className="smallBtn" onClick={() => onOpenJob?.(job.id)}>Edit RO</button>
                     </td>
