@@ -5,7 +5,7 @@ import Jobs from './pages/Jobs'
 import Invoices from './pages/Invoices'
 import Settings from './pages/Settings'
 
-export default function AdminLayout() {
+export default function AdminLayout({ adminEmail, onSignOut }) {
   const [page, setPage] = useState('dashboard')
   const [jobToOpen, setJobToOpen] = useState(null)
   const [jobsInitialSearch, setJobsInitialSearch] = useState('')
@@ -46,28 +46,31 @@ export default function AdminLayout() {
 
   return (
     <div className="adminShell">
-
       <aside className="adminSidebar">
-
         <div className="adminBrandBlock">
           <div className="adminBrandMain">Roger's Tire -N- Auto</div>
           <div className="adminBrandSub">Admin Portal</div>
         </div>
 
-        <button onClick={() => setPage('dashboard')}>🏠 Dashboard</button>
-        <button onClick={() => setPage('customers')}>👥 Customers</button>
-        <button onClick={() => openJobsPage('')}>🔧 Jobs</button>
-        <button onClick={() => openInvoicesPage('All', '')}>🧾 Invoices</button>
-        <button onClick={() => setPage('settings')}>⚙️ Settings</button>
+        <button onClick={() => setPage('dashboard')}>Dashboard</button>
+        <button onClick={() => setPage('customers')}>Customers</button>
+        <button onClick={() => openJobsPage('')}>Jobs</button>
+        <button onClick={() => openInvoicesPage('All', '')}>Invoices</button>
+        <button onClick={() => setPage('settings')}>Settings</button>
 
-        <a className="adminSiteLink" href="/">← Return to Website</a>
+        <a className="adminSiteLink" href="/">Return to Website</a>
 
+        <div className="adminSessionBlock">
+          {adminEmail && <span>{adminEmail}</span>}
+          <button type="button" className="adminSignOut" onClick={onSignOut}>
+            Sign Out
+          </button>
+        </div>
       </aside>
 
       <main className="adminContent">
         {renderPage()}
       </main>
-
     </div>
   )
 }

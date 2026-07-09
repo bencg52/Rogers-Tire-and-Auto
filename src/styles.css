@@ -508,6 +508,35 @@ footer{text-align:center;padding:28px;color:#aaa;background:#090909}
     font-size:16px;
 }
 
+.rememberLogin{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 16px;
+    color:#ddd;
+    font-size:14px;
+    font-weight:800;
+    text-align:left;
+}
+
+.rememberLogin input{
+    width:auto;
+    margin:0;
+    accent-color:#ef3338;
+}
+
+.loginError{
+    background:#fee2e2;
+    border:1px solid #fecaca;
+    border-radius:10px;
+    color:#991b1b;
+    font-size:14px;
+    font-weight:900;
+    margin:0 0 16px;
+    padding:12px 14px;
+    text-align:left;
+}
+
 .adminButton{
     width:100%;
     margin-top:8px;
@@ -2517,4 +2546,35 @@ button.dashboardGaugeCard,
   .adminContent{padding:24px 18px !important;}
   .adminContent > h1,
   .dashboardHeader h1{font-size:26px !important;}
+}
+
+.adminSessionBlock{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid rgba(255,255,255,.14);
+}
+
+.adminSessionBlock span{
+  display:block;
+  color:rgba(255,255,255,.72);
+  font-size:12px;
+  font-weight:800;
+  margin-bottom:10px;
+  overflow-wrap:anywhere;
+}
+
+.adminSignOut{
+  width:100%;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:10px;
+  padding:12px 14px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.adminSignOut:hover{
+  background:rgba(239,51,56,.22);
+  border-color:rgba(239,51,56,.45);
 }
