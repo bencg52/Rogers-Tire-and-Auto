@@ -2109,3 +2109,49 @@ background:#f8f8f8;
     padding-right:42px;
   }
 }
+
+/* Invoice page readability + inline status editing */
+.invoiceInlineStatus{
+  border:1px solid #d8e0ea;
+  border-radius:999px;
+  padding:9px 18px;
+  min-width:112px;
+  font-size:15px;
+  font-weight:900;
+  line-height:1.2;
+  cursor:pointer;
+  text-align:center;
+  appearance:auto;
+}
+.invoiceInlineStatus.draft{background:#ffedd5;color:#9a3412;border-color:#fed7aa}
+.invoiceInlineStatus.open{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}
+.invoiceInlineStatus.paid{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+.invoiceInlineStatus.void{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+.invoiceStatusBadge{
+  font-size:15px;
+  padding:9px 18px;
+  min-width:92px;
+}
+.invoiceModalTotals{
+  font-size:18px;
+  font-weight:900;
+  gap:22px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.invoiceModalTotals div{
+  font-size:18px;
+  line-height:1.35;
+  white-space:nowrap;
+}
+.invoiceModalTotals strong{
+  font-size:19px;
+}
+.compactInvoiceItems .modernTable td,
+.compactInvoiceItems .modernTable th{
+  font-size:17px;
+}
+@media (max-width:900px){
+  .invoiceInlineStatus{width:100%;min-width:0;font-size:14px;padding:8px 12px}
+  .invoiceModalTotals div{white-space:normal}
+}

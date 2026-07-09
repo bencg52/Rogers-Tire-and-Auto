@@ -10,6 +10,7 @@ export default function Invoices({ onOpenJob }) {
   const [statusFilter, setStatusFilter] = useState('All')
   const [selectedInvoice, setSelectedInvoice] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
 
   useEffect(() => {
     loadInvoices()
@@ -38,6 +39,42 @@ export default function Invoices({ onOpenJob }) {
     if (job.status === 'Completed') return 'Open'
     if (job.status === 'Cancelled') return 'Void'
     return 'Draft'
+  }
+
+
+  function showSuccess(message) {
+    setSuccessMsg(message)
+    setTimeout(() => setSuccessMsg(''), 2500)
+  }
+
+  function invoiceStatusToJobStatus(status) {
+    if (status === 'Open') return 'Completed'
+    if (status === 'Paid') return 'Picked Up'
+    if (status === 'Void') return 'Cancelled'
+    return 'Open'
+  }
+
+  async function updateInvoiceStatus(jobId, nextInvoiceStatus) {
+    setErrorMsg('')
+    const nextJobStatus = invoiceStatusToJobStatus(nextInvoiceStatus)
+
+    const { error } = await supabase
+      .from('admin_repair_orders')
+      .update({ status: nextJobStatus })
+      .eq('id', jobId)
+
+    if (error) {
+      setErrorMsg(error.message)
+      return
+    }
+
+    setJobs((currentJobs) => currentJobs.map((job) => (
+      job.id === jobId ? { ...job, status: nextJobStatus } : job
+    )))
+    setSelectedInvoice((currentInvoice) => (
+      currentInvoice?.id === jobId ? { ...currentInvoice, status: nextJobStatus } : currentInvoice
+    ))
+    showSuccess('Invoice status updated')
   }
 
   function escapeHtml(value) {
@@ -240,6 +277,8 @@ export default function Invoices({ onOpenJob }) {
 
   return (
     <>
+      {successMsg && <div className="saveToast">{successMsg}</div>}
+
       <h1>Invoices</h1>
 
       <div className="pageHeader customerTopBar">
@@ -299,7 +338,17 @@ export default function Invoices({ onOpenJob }) {
                     <td>{customerName(customer)}</td>
                     <td>{vehicleName(vehicle)}</td>
                     <td>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</td>
-                    <td><span className={`invoiceStatusBadge ${status.toLowerCase()}`}>{status}</span></td>
+                    <td>
+                      <select
+                        className={`invoiceInlineStatus ${status.toLowerCase()}`}
+                        value={status}
+                        onChange={(e) => updateInvoiceStatus(job.id, e.target.value)}
+                      >
+                        {['Draft', 'Open', 'Paid', 'Void'].map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    </td>
                     <td>${money(totals.total)}</td>
                     <td className="actionCell">
                       <button className="smallBtn" onClick={() => setSelectedInvoice(job)}>View</button>
@@ -330,7 +379,18 @@ export default function Invoices({ onOpenJob }) {
                 <div><strong>RO #</strong><span>{job.ro_number || '-'}</span></div>
                 <div><strong>Customer</strong><span>{customerName(customer)}</span></div>
                 <div><strong>Vehicle</strong><span>{vehicleName(vehicle)}</span></div>
-                <div><strong>Status</strong><span>{invoiceStatus(job)}</span></div>
+                <div>
+                  <strong>Status</strong>
+                  <select
+                    className={`invoiceInlineStatus ${invoiceStatus(job).toLowerCase()}`}
+                    value={invoiceStatus(job)}
+                    onChange={(e) => updateInvoiceStatus(job.id, e.target.value)}
+                  >
+                    {['Draft', 'Open', 'Paid', 'Void'].map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </div>
                 <div><strong>Date</strong><span>{job.opened_at ? new Date(job.opened_at).toLocaleDateString() : '-'}</span></div>
                 <div><strong>Total</strong><span>${money(totals.total)}</span></div>
               </div>
