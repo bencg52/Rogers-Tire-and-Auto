@@ -463,7 +463,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
     const tax = Number(job.tax || (subtotal * 0.06))
     const total = Number(job.total || subtotal + tax)
 
-    const itemRows = Array.from({ length: 12 }).map((_, index) => {
+    const itemRows = Array.from({ length: 13 }).map((_, index) => {
       const item = items[index]
       return `
         <tr>
@@ -482,31 +482,33 @@ export default function Jobs({ openJobId, onJobOpened }) {
         <head>
           <title>Invoice ${escapeHtml(invoiceNumber)}</title>
           <style>
-            @page{size:letter;margin:0.35in}
+            @page{size:letter;margin:0.33in 0.38in}
             *{box-sizing:border-box}
-            body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;margin:0;padding:0;font-size:13px}
-            .invoice{width:7.8in;min-height:10.2in;margin:0 auto;padding:0.15in 0.1in}
-            .top{display:grid;grid-template-columns:1fr 2.55in;align-items:start;margin-bottom:0.28in}
-            .shop{font-size:18px;font-weight:700;line-height:1.25;padding-left:0.25in;padding-top:0.2in}
+            body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;margin:0;padding:0;font-size:12px}
+            .invoice{width:7.75in;min-height:10.25in;margin:0 auto;padding:0.08in 0}
+            .top{display:grid;grid-template-columns:1fr 2.45in;align-items:start;margin-bottom:0.12in}
+            .shop{font-size:17px;font-weight:700;line-height:1.13;padding-left:0.42in;padding-top:0.18in}
             .shop div:not(:first-child){font-weight:500}
-            .invoiceTitle{text-align:center;font-size:31px;font-weight:900;margin-bottom:0.08in}
-            .dateBox{width:2.25in;margin-left:auto;border-collapse:collapse;font-size:12px;text-align:center}
-            .dateBox th,.dateBox td{border:1px solid #111;padding:7px 8px}
-            .billTo{width:3.6in;height:1.05in;border:1px solid #111;margin-left:0.1in;margin-bottom:1.25in}
-            .billToHeader{text-align:center;border-bottom:1px solid #111;font-weight:700;font-size:11px;padding:3px;background:#eee}
-            .billToBody{padding:8px 10px;line-height:1.3;font-size:13px}
-            .items{width:100%;border-collapse:collapse;table-layout:fixed}
-            .items th{border:1px solid #111;background:#ddd;font-size:11px;padding:4px;text-align:center}
-            .items td{border-left:1px solid #111;border-right:1px solid #111;height:0.33in;padding:5px 7px;vertical-align:top}
-            .items tr:last-child td{border-bottom:1px solid #111}
-            .items .item{width:1.05in}.items .desc{width:3.6in}.items .qty{width:0.8in}.items .rate{width:1.0in}.items .amount{width:1.15in}
-            .bottom{display:grid;grid-template-columns:1fr 3.0in;margin-top:0;border-left:1px solid #111;border-bottom:1px solid #111;border-right:1px solid #111;min-height:1.05in}
-            .notes{border-right:1px solid #111;padding:10px;white-space:pre-wrap;font-size:12px}
-            .totals{display:grid;grid-template-rows:0.3in 0.3in 0.45in}
-            .totals div{border-bottom:1px solid #111;padding:7px 9px;font-weight:700}
-            .totals div:last-child{border-bottom:0;background:#ddd;font-size:28px;font-weight:900;display:flex;justify-content:space-between;align-items:center}
-            .totals span{float:right}
-            @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.invoice{margin:0}}
+            .invoiceTitle{text-align:right;font-size:30px;font-weight:900;margin:0.18in 0 0.06in 0;padding-right:0.05in}
+            .dateBox{width:2.22in;margin-left:auto;border-collapse:collapse;font-size:11px;text-align:center;table-layout:fixed}
+            .dateBox th,.dateBox td{border:1.25px solid #111;padding:6px 7px;height:0.25in}
+            .dateBox th{background:#d9d9d9;font-weight:800;font-size:10px}
+            .billTo{width:3.85in;height:1.06in;border:1.25px solid #111;margin-left:0.34in;margin-top:0.02in;margin-bottom:1.32in}
+            .billToHeader{text-align:center;border-bottom:1.25px solid #111;font-weight:800;font-size:10px;padding:3px 0;background:#d9d9d9;line-height:1}
+            .billToBody{padding:7px 10px;line-height:1.22;font-size:12px;min-height:0.83in}
+            .items{width:100%;border-collapse:collapse;table-layout:fixed;border:1.25px solid #111}
+            .items th{border:1.25px solid #111;background:#d9d9d9;font-size:10px;padding:4px 3px;text-align:center;font-weight:800;line-height:1}
+            .items td{border-left:1.25px solid #111;border-right:1.25px solid #111;height:0.43in;padding:5px 7px;vertical-align:top;font-size:12px}
+            .items tr:last-child td{border-bottom:1.25px solid #111}
+            .items .item{width:1.08in}.items .desc{width:3.55in}.items .qty{width:0.78in}.items .rate{width:1.05in}.items .amount{width:1.29in}
+            .bottom{display:grid;grid-template-columns:1fr 3.0in;margin-top:0;border-left:1.25px solid #111;border-bottom:1.25px solid #111;border-right:1.25px solid #111;min-height:1.02in}
+            .notes{border-right:1.25px solid #111;padding:9px 10px;white-space:pre-wrap;font-size:11px}
+            .totals{display:grid;grid-template-rows:0.31in 0.31in 0.4in}
+            .totals div{border-bottom:1.25px solid #111;padding:7px 9px;font-weight:700;line-height:1}
+            .totals div:last-child{border-bottom:0;background:#d9d9d9;font-size:28px;font-weight:900;display:flex;justify-content:space-between;align-items:center;padding-top:4px;padding-bottom:4px}
+            .totals span{float:right;font-size:12px;font-weight:700;margin-top:3px}
+            .totals div:last-child span{font-size:18px;font-weight:900;margin-top:0}
+            @media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.invoice{margin:0 auto}}
           </style>
         </head>
         <body>
