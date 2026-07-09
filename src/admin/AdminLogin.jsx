@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase, supabaseReady } from '../lib/supabase'
 import AdminLayout from './AdminLayout'
 
-const REMEMBER_ADMIN_EMAIL_KEY = 'rogers_admin_email'
+const REMEMBER_ADMIN_USERNAME_KEY = 'rogers_admin_username'
 
 export default function AdminLogin() {
   const [session, setSession] = useState(null)
-  const [email, setEmail] = useState(() => localStorage.getItem(REMEMBER_ADMIN_EMAIL_KEY) || '')
+  const [username, setUsername] = useState(() => localStorage.getItem(REMEMBER_ADMIN_USERNAME_KEY) || '')
   const [password, setPassword] = useState('')
-  const [rememberEmail, setRememberEmail] = useState(() => Boolean(localStorage.getItem(REMEMBER_ADMIN_EMAIL_KEY)))
+  const [rememberUsername, setRememberUsername] = useState(() => Boolean(localStorage.getItem(REMEMBER_ADMIN_USERNAME_KEY)))
   const [loading, setLoading] = useState(true)
   const [signingIn, setSigningIn] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -80,8 +80,18 @@ export default function AdminLogin() {
 
     setSigningIn(true)
 
+    const { data: loginEmail, error: lookupError } = await supabase.rpc('admin_login_email', {
+      login_username: username.trim().toLowerCase()
+    })
+
+    if (lookupError || !loginEmail) {
+      setSigningIn(false)
+      setErrorMsg('Invalid username or password.')
+      return
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: loginEmail,
       password
     })
 
@@ -91,10 +101,10 @@ export default function AdminLogin() {
       return
     }
 
-    if (rememberEmail) {
-      localStorage.setItem(REMEMBER_ADMIN_EMAIL_KEY, email.trim())
+    if (rememberUsername) {
+      localStorage.setItem(REMEMBER_ADMIN_USERNAME_KEY, username.trim().toLowerCase())
     } else {
-      localStorage.removeItem(REMEMBER_ADMIN_EMAIL_KEY)
+      localStorage.removeItem(REMEMBER_ADMIN_USERNAME_KEY)
     }
 
     await verifyAdminSession(data.session)
@@ -131,11 +141,11 @@ export default function AdminLogin() {
         {errorMsg && <div className="loginError">{errorMsg}</div>}
 
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder="Username"
           autoComplete="username"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input
@@ -150,10 +160,10 @@ export default function AdminLogin() {
         <label className="rememberLogin">
           <input
             type="checkbox"
-            checked={rememberEmail}
-            onChange={(e) => setRememberEmail(e.target.checked)}
+            checked={rememberUsername}
+            onChange={(e) => setRememberUsername(e.target.checked)}
           />
-          <span>Remember email on this device</span>
+          <span>Remember username on this device</span>
         </label>
 
         <button
