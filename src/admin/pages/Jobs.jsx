@@ -51,6 +51,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
   const [vehicleForm, setVehicleForm] = useState(emptyVehicle)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [isSavingJob, setIsSavingJob] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -340,82 +341,97 @@ export default function Jobs({ openJobId, onJobOpened }) {
   }
 
   async function saveJob() {
+    if (isSavingJob) return
+
     setErrorMsg('')
+    setIsSavingJob(true)
 
-    const payload = {
-      customer_id: jobForm.customerId || null,
-      vehicle_id: jobForm.vehicleId || null,
-      technician: jobForm.technician,
-      mileage_in: jobForm.mileage,
-      customer_complaint: jobForm.complaint,
-      diagnosis: jobForm.diagnosis,
-      repairs_performed: jobForm.repairs,
-      parts_total: Number(calculateSubtotal(jobForm.lineItems).toFixed(2)),
-      labor_total: 0,
-      tax: Number(calculateTax(jobForm.lineItems)),
-      total: Number(calculateTotalFromItems(jobForm.lineItems)),
-      status: jobForm.status
-    }
-
-    let savedJobId = editingJob?.id
-
-    if (editingJob) {
-      const { error } = await supabase
-        .from('admin_repair_orders')
-        .update(payload)
-        .eq('id', editingJob.id)
-
-      if (error) {
-        setErrorMsg(error.message)
-        return
+    try {
+      const lineItems = jobForm.lineItems || []
+      const payload = {
+        customer_id: jobForm.customerId || null,
+        vehicle_id: jobForm.vehicleId || null,
+        technician: jobForm.technician,
+        mileage_in: jobForm.mileage,
+        customer_complaint: jobForm.complaint,
+        diagnosis: jobForm.diagnosis,
+        repairs_performed: jobForm.repairs,
+        parts_total: Number(calculateSubtotal(lineItems).toFixed(2)),
+        labor_total: 0,
+        tax: Number(calculateTax(lineItems)),
+        total: Number(calculateTotalFromItems(lineItems)),
+        status: jobForm.status
       }
 
-      showSuccess('Job updated')
-    } else {
-      const roNumber = await generateNextRoNumber()
-      const { data, error } = await supabase
-        .from('admin_repair_orders')
-        .insert({ ...payload, ro_number: roNumber })
-        .select('id')
-        .single()
+      let savedJobId = editingJob?.id
+      let savedRoNumber = editingJob?.ro_number
 
-      if (error) {
-        setErrorMsg(error.message)
-        return
+      if (editingJob) {
+        const { error } = await supabase
+          .from('admin_repair_orders')
+          .update(payload)
+          .eq('id', editingJob.id)
+
+        if (error) throw error
+      } else {
+        const roNumber = await generateNextRoNumber()
+        const { data, error } = await supabase
+          .from('admin_repair_orders')
+          .insert({ ...payload, ro_number: roNumber })
+          .select('id, ro_number')
+          .single()
+
+        if (error) throw error
+
+        savedJobId = data.id
+        savedRoNumber = data.ro_number
       }
 
-      savedJobId = data.id
-      showSuccess('Job created')
-    }
+      if (savedJobId) {
+        const { error: deleteItemsError } = await supabase
+          .from('admin_invoice_items')
+          .delete()
+          .eq('repair_order_id', savedJobId)
 
-    if (savedJobId) {
-      await supabase.from('admin_invoice_items').delete().eq('repair_order_id', savedJobId)
+        if (deleteItemsError) throw deleteItemsError
 
-      const itemPayload = (jobForm.lineItems || [])
-        .filter((item) => item.description || item.amount || item.rate)
-        .map((item, index) => ({
-          repair_order_id: savedJobId,
-          line_number: index + 1,
-          item_code: item.item || String(index + 1),
-          description: item.description || '',
-          qty: Number(item.qty || 0),
-          rate: Number(item.rate || 0),
-          amount: Number(item.amount || 0)
-        }))
+        const itemPayload = lineItems
+          .filter((item) => item.description || item.amount || item.rate || item.item)
+          .map((item, index) => {
+            const qty = Number(item.qty || 0)
+            const rate = Number(item.rate || 0)
+            const amount = Number(item.amount || (qty * rate) || 0)
 
-      if (itemPayload.length) {
-        const { error: itemError } = await supabase.from('admin_invoice_items').insert(itemPayload)
-        if (itemError) {
-          setErrorMsg(itemError.message)
-          return
+            return {
+              repair_order_id: savedJobId,
+              line_number: index + 1,
+              item_code: item.item || String(index + 1),
+              description: item.description || '',
+              qty,
+              rate,
+              amount
+            }
+          })
+
+        if (itemPayload.length) {
+          const { error: itemError } = await supabase
+            .from('admin_invoice_items')
+            .insert(itemPayload)
+
+          if (itemError) throw itemError
         }
       }
-    }
 
-    setShowJobForm(false)
-    setEditingJob(null)
-    setJobForm(emptyJob)
-    await loadData()
+      await loadData()
+      setShowJobForm(false)
+      setEditingJob(null)
+      setJobForm(emptyJob)
+      showSuccess(`${savedRoNumber || 'Repair Order'} saved successfully`)
+    } catch (error) {
+      setErrorMsg(error.message || 'Unable to save job. Please try again.')
+    } finally {
+      setIsSavingJob(false)
+    }
   }
 
   async function updateJobStatus(jobId, status) {
@@ -773,7 +789,7 @@ export default function Jobs({ openJobId, onJobOpened }) {
 
             <div className="modalActions">
               <button className="btn secondary" onClick={() => setShowJobForm(false)}>Cancel</button>
-              <button className="btn primary" onClick={saveJob}>{editingJob ? 'Save Job' : 'Create Job'}</button>
+              <button className="btn primary" onClick={saveJob} disabled={isSavingJob}>{isSavingJob ? 'Saving...' : (editingJob ? 'Save Job' : 'Create Job')}</button>
             </div>
           </div>
         </div>

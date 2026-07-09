@@ -1,4 +1,4 @@
--- Run this in Supabase SQL Editor before using the new invoice line-item feature.
+-- Run this in Supabase SQL Editor before using the invoice line-item feature.
 -- This keeps invoice data in Supabase instead of local browser storage.
 
 create table if not exists public.admin_invoice_items (
@@ -20,26 +20,26 @@ on public.admin_invoice_items(repair_order_id);
 alter table public.admin_invoice_items enable row level security;
 
 drop policy if exists "Allow invoice items read" on public.admin_invoice_items;
-create policy "Allow invoice items read"
-on public.admin_invoice_items
-for select
-using (true);
-
 drop policy if exists "Allow invoice items insert" on public.admin_invoice_items;
-create policy "Allow invoice items insert"
-on public.admin_invoice_items
-for insert
-with check (true);
-
 drop policy if exists "Allow invoice items update" on public.admin_invoice_items;
-create policy "Allow invoice items update"
+drop policy if exists "Allow invoice items delete" on public.admin_invoice_items;
+drop policy if exists "Allow public access to invoice items" on public.admin_invoice_items;
+drop policy if exists "Allow anon full access to invoice items" on public.admin_invoice_items;
+
+create policy "Allow anon full access to invoice items"
 on public.admin_invoice_items
-for update
+for all
+to anon
 using (true)
 with check (true);
 
-drop policy if exists "Allow invoice items delete" on public.admin_invoice_items;
-create policy "Allow invoice items delete"
+create policy "Allow authenticated full access to invoice items"
 on public.admin_invoice_items
-for delete
-using (true);
+for all
+to authenticated
+using (true)
+with check (true);
+
+grant usage on schema public to anon;
+grant all on table public.admin_invoice_items to anon;
+grant all on table public.admin_invoice_items to authenticated;

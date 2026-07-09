@@ -1846,3 +1846,82 @@ background:#f8f8f8;
 .lineItemRow .lineDesc{min-width:220px}
 .invoiceTotalsPreview{background:#f7f7f7;border:1px solid #ddd;border-radius:10px;padding:12px;margin:8px 0 16px;font-size:15px}
 @media(max-width:900px){.lineItemRow{grid-template-columns:1fr}.lineItemRow .lineDesc{min-width:0}}
+
+/* Repair order modal / invoice line item fixes */
+.modalOverlay{
+  align-items:flex-start !important;
+  overflow-y:auto !important;
+  padding:24px 12px !important;
+}
+
+.modalCard{
+  max-width:calc(100vw - 24px) !important;
+  max-height:calc(100vh - 48px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+.wideModal{
+  width:min(880px, calc(100vw - 24px)) !important;
+  max-width:min(880px, calc(100vw - 24px)) !important;
+}
+
+.wideModal *,
+.lineItemsEditor *,
+.lineItemRow *{
+  box-sizing:border-box;
+  min-width:0;
+}
+
+.lineItemsEditor{
+  width:100%;
+  overflow:visible;
+}
+
+.lineItemRow{
+  display:grid !important;
+  grid-template-columns:minmax(66px,.7fr) minmax(180px,2fr) minmax(70px,.7fr) minmax(85px,.9fr) minmax(95px,1fr) minmax(82px,auto) !important;
+  gap:8px !important;
+  align-items:center !important;
+  width:100% !important;
+}
+
+.lineItemRow input,
+.lineItemRow .lineDesc{
+  width:100% !important;
+  min-width:0 !important;
+  margin-bottom:0 !important;
+}
+
+.lineItemRow .smallBtn{
+  width:100%;
+  white-space:normal;
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.invoiceTotalsPreview{
+  overflow-wrap:anywhere;
+  line-height:1.5;
+}
+
+@media(max-width:760px){
+  .lineItemRow{
+    grid-template-columns:1fr 1fr !important;
+  }
+  .lineItemRow .lineDesc{
+    grid-column:1 / -1;
+  }
+  .lineItemRow .smallBtn{
+    grid-column:1 / -1;
+  }
+  .modalGrid{
+    grid-template-columns:1fr !important;
+  }
+}
+
+@media(max-width:520px){
+  .lineItemRow{
+    grid-template-columns:1fr !important;
+  }
+}
