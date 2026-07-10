@@ -210,8 +210,8 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
             .items th{border:1.15px solid #111;background:#d9d9d9;font-size:9.5px;padding:3px 3px;text-align:center;font-weight:800;line-height:1}
             .items td{border-left:1.15px solid #111;border-right:1.15px solid #111;height:0.34in;padding:4px 6px;vertical-align:top;font-size:11px;line-height:1.1;overflow:hidden}
             .items tr:last-child td{border-bottom:1.15px solid #111}
-            .items .item{width:1.08in}.items .desc{width:3.75in}.items .qty{width:0.72in}.items .rate{width:1.0in}.items .amount{width:1.23in}
-            .bottom{display:grid;grid-template-columns:1fr 2.95in;margin-top:0;border-left:1.15px solid #111;border-bottom:1.15px solid #111;border-right:1.15px solid #111;min-height:0.82in;break-inside:avoid;page-break-inside:avoid}
+            .items .item{width:1.1in}.items .desc{width:3.85in}.items .qty{width:0.75in}.items .rate{width:1.05in}.items .amount{width:1.25in}
+            .bottom{display:grid;grid-template-columns:5.7in 1fr;margin-top:0;border-left:1.15px solid #111;border-bottom:1.15px solid #111;border-right:1.15px solid #111;min-height:0.82in;break-inside:avoid;page-break-inside:avoid}
             .notes{border-right:1.15px solid #111;padding:7px 9px;white-space:pre-wrap;font-size:10.5px;line-height:1.12;overflow:hidden}
             .totals{display:grid;grid-template-rows:0.25in 0.25in 0.32in}
             .totals div{border-bottom:1.15px solid #111;padding:5px 8px;font-weight:700;line-height:1}
@@ -257,7 +257,7 @@ export default function Invoices({ onOpenJob, initialStatusFilter = 'All', initi
             </table>
 
             <div class="bottom">
-              <div class="notes">${escapeHtml(job.customer_complaint || '')}</div>
+              <div class="notes">Thank you for your business!</div>
               <div class="totals">
                 <div>Subtotal <span>$${money(subtotal)}</span></div>
                 <div>6% Tax <span>$${money(tax)}</span></div>

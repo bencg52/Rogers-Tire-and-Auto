@@ -35,14 +35,53 @@ const fallbackServices = [
 ]
 
 function dedupeServices(serviceList) {
-  const seen = new Set()
+  const preferredNames = {
+    ac: ['a/c service'],
+    brakes: ['brake repair', 'brake inspection'],
+    diagnostics: ['diagnostics', 'check engine diagnostic'],
+    engine: ['engine repair'],
+    oil: ['oil change'],
+    tires: ['tires & alignment', 'wheel alignment', 'tire rotation']
+  }
 
-  return serviceList.filter((service) => {
-    const key = String(service.service_name || '').trim().toLowerCase()
-    if (!key || seen.has(key)) return false
-    seen.add(key)
-    return true
+  function groupFor(service) {
+    const text = `${service.category || ''} ${service.service_name || ''} ${service.description || ''}`.toLowerCase()
+    const name = String(service.service_name || '').trim().toLowerCase()
+
+    if (!name) return ''
+    if (text.includes('a/c') || text.includes('air conditioning')) return 'ac'
+    if (text.includes('brake')) return 'brakes'
+    if (text.includes('diagnostic') || text.includes('check engine') || text.includes('electrical')) return 'diagnostics'
+    if (text.includes('engine')) return 'engine'
+    if (text.includes('oil')) return 'oil'
+    if (text.includes('tire') || text.includes('alignment')) return 'tires'
+
+    return name
+  }
+
+  function priorityFor(service, group) {
+    const name = String(service.service_name || '').trim().toLowerCase()
+    const rank = preferredNames[group]?.indexOf(name)
+    const emptyPricePenalty = Number(service.base_price || 0) <= 0 ? 20 : 0
+
+    return (rank >= 0 ? rank : 10) + emptyPricePenalty
+  }
+
+  const selected = new Map()
+
+  ;(serviceList || []).forEach((service) => {
+    const group = groupFor(service)
+    if (!group) return
+
+    const current = selected.get(group)
+    if (!current || priorityFor(service, group) < priorityFor(current, group)) {
+      selected.set(group, service)
+    }
   })
+
+  return Array.from(selected.values()).sort((a, b) =>
+    String(a.service_name || '').localeCompare(String(b.service_name || ''))
+  )
 }
 
 function ServiceIcon({ category, name }) {

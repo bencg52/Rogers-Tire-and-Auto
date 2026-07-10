@@ -19,29 +19,47 @@ const emptyVehicle = {
 const jobStatuses = ['Open', 'Estimate', 'Approved', 'In Progress', 'Waiting on Parts', 'Completed', 'Picked Up', 'Cancelled']
 
 const DEFAULT_SHOP_SETTINGS = {
-  laborRate: 175,
+  laborRate: 100,
+  shopFee: 15,
   taxRate: 0.06
 }
 
+function moneyValue(value) {
+  return Number(value || 0).toFixed(2)
+}
 
-const emptyJob = {
-  id: null,
-  customerId: '',
-  vehicleId: '',
-  walkInVehicle: '',
-  technician: '',
-  mileage: '',
-  complaint: '',
-  diagnosis: '',
-  repairs: '',
-  partsTotal: '',
-  laborTotal: '',
-  tax: '',
-  total: '',
-  status: 'Open',
-  lineItems: [
-    { item: '1', description: '', qty: '1', rate: '', amount: '' }
+function defaultLineItems(settings = DEFAULT_SHOP_SETTINGS) {
+  const laborRate = moneyValue(settings.laborRate || DEFAULT_SHOP_SETTINGS.laborRate)
+  const shopFee = moneyValue(settings.shopFee || DEFAULT_SHOP_SETTINGS.shopFee)
+
+  return [
+    { item: 'Labor', description: 'Labor', qty: '1', rate: laborRate, amount: laborRate },
+    { item: 'Shop Fee', description: 'Shop Fee', qty: '1', rate: shopFee, amount: shopFee }
   ]
+}
+
+function createEmptyJob(settings = DEFAULT_SHOP_SETTINGS) {
+  const lineItems = defaultLineItems(settings)
+  const subtotal = lineItems.reduce((sum, item) => sum + Number(item.amount || 0), 0)
+  const tax = subtotal * Number(settings.taxRate || DEFAULT_SHOP_SETTINGS.taxRate)
+
+  return {
+    id: null,
+    customerId: '',
+    vehicleId: '',
+    walkInVehicle: '',
+    technician: '',
+    mileage: '',
+    complaint: '',
+    diagnosis: '',
+    repairs: '',
+    partsTotal: moneyValue(subtotal),
+    laborTotal: '0.00',
+    tax: moneyValue(tax),
+    total: moneyValue(subtotal + tax),
+    status: 'Open',
+    lineItems
+  }
 }
 
 export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
@@ -54,7 +72,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   const [showVehicleForm, setShowVehicleForm] = useState(false)
   const [editingJob, setEditingJob] = useState(null)
   const [editingVehicle, setEditingVehicle] = useState(null)
-  const [jobForm, setJobForm] = useState(emptyJob)
+  const [jobForm, setJobForm] = useState(() => createEmptyJob())
   const [vehicleForm, setVehicleForm] = useState(emptyVehicle)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -100,6 +118,11 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
     return text === 'labor' || text.includes(' labor') || text.startsWith('labor')
   }
 
+  function isShopFeeLine(item) {
+    const text = `${item?.item || ''} ${item?.description || ''}`.toLowerCase().trim()
+    return text === 'shop fee' || text.includes('shop fee') || text.includes('shop supplies')
+  }
+
   function customerName(c) {
     if (!c) return 'Walk-In / No Customer'
     return `${c.first_name || ''} ${c.last_name || ''}`.trim() || 'Unnamed Customer'
@@ -140,7 +163,15 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
         nextItem.rate = String(shopSettings.laborRate || DEFAULT_SHOP_SETTINGS.laborRate)
       }
 
-      if (field === 'qty' || field === 'rate' || ((field === 'description' || field === 'item') && isLaborLine(nextItem))) {
+      if ((field === 'description' || field === 'item') && isShopFeeLine(nextItem) && !Number(nextItem.rate || 0)) {
+        nextItem.rate = String(shopSettings.shopFee || DEFAULT_SHOP_SETTINGS.shopFee)
+      }
+
+      if (
+        field === 'qty' ||
+        field === 'rate' ||
+        ((field === 'description' || field === 'item') && (isLaborLine(nextItem) || isShopFeeLine(nextItem)))
+      ) {
         nextItem.amount = (Number(nextItem.qty || 0) * Number(nextItem.rate || 0)).toFixed(2)
       }
       return nextItem
@@ -181,13 +212,14 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
   async function loadShopSettings() {
     const { data, error } = await supabase
       .from('admin_shop_settings')
-      .select('shop_labor_rate, sales_tax_rate')
+      .select('shop_labor_rate, shop_fee, sales_tax_rate')
       .eq('id', 1)
       .maybeSingle()
 
     if (!error && data) {
       setShopSettings({
         laborRate: Number(data.shop_labor_rate || DEFAULT_SHOP_SETTINGS.laborRate),
+        shopFee: Number(data.shop_fee || DEFAULT_SHOP_SETTINGS.shopFee),
         taxRate: Number(data.sales_tax_rate || DEFAULT_SHOP_SETTINGS.taxRate)
       })
     }
@@ -355,7 +387,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
       })
     } else {
       setEditingJob(null)
-      setJobForm(emptyJob)
+      setJobForm(createEmptyJob(shopSettings))
     }
 
     setShowJobForm(true)
@@ -572,8 +604,8 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
             .items th{border:1.15px solid #111;background:#d9d9d9;font-size:9.5px;padding:3px 3px;text-align:center;font-weight:800;line-height:1}
             .items td{border-left:1.15px solid #111;border-right:1.15px solid #111;height:0.34in;padding:4px 6px;vertical-align:top;font-size:11px;line-height:1.1;overflow:hidden}
             .items tr:last-child td{border-bottom:1.15px solid #111}
-            .items .item{width:1.08in}.items .desc{width:3.75in}.items .qty{width:0.72in}.items .rate{width:1.0in}.items .amount{width:1.23in}
-            .bottom{display:grid;grid-template-columns:1fr 2.95in;margin-top:0;border-left:1.15px solid #111;border-bottom:1.15px solid #111;border-right:1.15px solid #111;min-height:0.82in;break-inside:avoid;page-break-inside:avoid}
+            .items .item{width:1.1in}.items .desc{width:3.85in}.items .qty{width:0.75in}.items .rate{width:1.05in}.items .amount{width:1.25in}
+            .bottom{display:grid;grid-template-columns:5.7in 1fr;margin-top:0;border-left:1.15px solid #111;border-bottom:1.15px solid #111;border-right:1.15px solid #111;min-height:0.82in;break-inside:avoid;page-break-inside:avoid}
             .notes{border-right:1.15px solid #111;padding:7px 9px;white-space:pre-wrap;font-size:10.5px;line-height:1.12;overflow:hidden}
             .totals{display:grid;grid-template-rows:0.25in 0.25in 0.32in}
             .totals div{border-bottom:1.15px solid #111;padding:5px 8px;font-weight:700;line-height:1}
@@ -619,7 +651,7 @@ export default function Jobs({ openJobId, onJobOpened, initialSearch = '' }) {
             </table>
 
             <div class="bottom">
-              <div class="notes">${escapeHtml(job.customer_complaint || '')}</div>
+              <div class="notes">Thank you for your business!</div>
               <div class="totals">
                 <div>Subtotal <span>$${money(subtotal)}</span></div>
                 <div>6% Tax <span>$${money(tax)}</span></div>

@@ -30,7 +30,7 @@ grant execute on function public.admin_login_email(text) to anon, authenticated;
 insert into public.admin_users (user_id, email, username, role, active)
 select id, email, 'admin', 'owner', true
 from auth.users
-where email = 'bencg@gmail.com'
+where email = 'bencg3@gmail.com'
 on conflict (user_id) do update set
   email = excluded.email,
   username = excluded.username,
