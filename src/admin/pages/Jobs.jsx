@@ -33,8 +33,8 @@ function defaultLineItems(settings = DEFAULT_SHOP_SETTINGS) {
   const shopFee = moneyValue(settings.shopFee || DEFAULT_SHOP_SETTINGS.shopFee)
 
   return [
-    { item: 'Labor', description: 'Labor', qty: '1', rate: laborRate, amount: laborRate },
-    { item: 'Shop Fee', description: 'Shop Fee', qty: '1', rate: shopFee, amount: shopFee }
+    { item: '1', description: 'Labor', qty: '1', rate: laborRate, amount: laborRate },
+    { item: '2', description: 'Shop Fee', qty: '1', rate: shopFee, amount: shopFee }
   ]
 }
 
