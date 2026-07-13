@@ -252,7 +252,7 @@ function PublicSite() {
         <Link className="btn secondary" to="/admin">Open Admin Portal</Link>
       </section>
 
-      <footer>© 2026 {BUSINESS.name}. Built on GitHub, Netlify, and Supabase.</footer>
+      <footer>© 2026 {BUSINESS.name}. Built on GitHub, Netlify, and Supabase.<br /><small>Website managed by Faith Forged Digital.</small></footer>
     </>
   )
 }
