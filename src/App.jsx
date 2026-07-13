@@ -220,6 +220,10 @@ function PublicSite() {
           <div><Clock /> {BUSINESS.hoursSummary}</div>
         </div>
       </section>
+
+      <footer>
+        <small>Website managed by Faith Forged Digital.</small>
+      </footer>
     </>
   )
 }
